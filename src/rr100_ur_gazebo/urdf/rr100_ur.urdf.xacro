@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="chassis">
+    <xacro:include filename="$(find rr100_gazebo)/urdf/rr100.urdf.xacro" />
+    <xacro:include filename="$(find ur5e_gripper_gazebo)/urdf/ur_hand_e.xacro" />
+
+    <!-- Base Size -->
+    <xacro:property name="chassis_x_size" value="0.80" />
+    <xacro:property name="base_y_size" value="0.280" />
+    <xacro:property name="base_z_size" value="0.4215" />
+
+    <xacro:property name="ground_clearance" value="0.11" />
+
+    <!-- Mounting plate properties (in meters)-->
+    <xacro:property name="plate_rear_distance" value="0.05"/>
+    <xacro:property name="plate_width" value="0.25" />
+    <xacro:property name="plate_height" value="0.2" />
+    <xacro:property name="plate_thickness" value="0.01" />
+
+    <xacro:property name="rail_size" value="0.02" />
+
+    <xacro:property name="M_PI" value="3.14159" />
+
+    <!-- parameters -->
+    <xacro:arg name="joint_limit_params" default="" />
+    <xacro:arg name="kinematics_params" default="" />
+    <xacro:arg name="physical_params" default="" />
+    <xacro:arg name="visual_params" default="" />
+    <!-- legal values:
+        - hardware_interface/PositionJointInterface
+        - hardware_interface/VelocityJointInterface
+        - hardware_interface/EffortJointInterface -->
+    <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface" />
+    <xacro:arg name="safety_limits" default="false" />
+    <xacro:arg name="safety_pos_margin" default="0.15" />
+    <xacro:arg name="safety_k_position" default="20" />
+
+    <xacro:arg name="ur_prefix" default="ur_"/>
+
+    <link name="mounting_base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${M_PI / 2}" />
+
+            <geometry>
+                <mesh filename="package://rr100_ur_description/meshes/ur5_mounting_plate.stl"
+                    scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="grey" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://rr100_ur_description/meshes/ur5_mounting_plate.stl"
+                    scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="mounting_base_joint" type="fixed">
+        <!-- ${-base_x_size/2 + 0.025 + 0.2 / 2} 0 ${base_z_size} -->
+        <origin
+            xyz="${-chassis_x_size/2 + plate_rear_distance + plate_height / 2} 0 ${(base_z_size + ground_clearance) / 2 + plate_thickness + plate_thickness / 2 + rail_size}"
+            rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="mounting_base_link" />
+    </joint>
+    <gazebo reference="mounting_base_link">
+    </gazebo>
+
+    <xacro:ur5_hand_e
+        prefix="$(arg ur_prefix)"
+        joint_limit_params="$(arg joint_limit_params)"
+        kinematics_params="$(arg kinematics_params)"
+        physical_params="$(arg physical_params)"
+        visual_params="$(arg visual_params)"
+        transmission_hw_interface="$(arg transmission_hw_interface)"
+        safety_limits="$(arg safety_limits)"
+        safety_pos_margin="$(arg safety_pos_margin)"
+        safety_k_position="$(arg safety_k_position)" />
+    
+    <joint name="ur_base_joint" type="fixed">
+        <parent link="mounting_base_link"/>
+        <child link="$(arg ur_prefix)base_link"/>
+    </joint>
+</robot>

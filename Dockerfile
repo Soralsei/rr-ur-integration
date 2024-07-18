@@ -28,10 +28,13 @@ RUN --mount=type=cache,target=/var/cache/apt \
 apt-get update && apt-get install --no-install-recommends -y git
 
 WORKDIR ${WORKSPACE_RR100}
-RUN git clone https://github.com/Soralsei/rr100-rhoban.git . && git submodule update --init --recursive
-# COPY rr100_ws/src .
+# ADD "https://api.github.com/repos/Soralsei/rr100-rhoban/commits?per_page=1" latest_commit
+# rm -f latest_commit &&
+RUN git clone https://github.com/Soralsei/rr100-rhoban.git . && git submodule update --init --recursive 
 
 WORKDIR ${WORKSPACE_UR}
+# ADD "https://api.github.com/repos/Soralsei/ur5-rhoban/commits?per_page=1" latest_commit
+# rm -f latest_commit &&
 RUN git clone https://github.com/Soralsei/ur5-rhoban.git . && git submodule update --init --recursive
 
 # Separate package.xml files in /tmp directory
@@ -55,9 +58,8 @@ echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/robotpkg.asc] http://robotpkg.
     | tee /etc/apt/sources.list.d/robotpkg.list
 
 apt update
-apt install -qqy robotpkg-py38-pinocchio
-sudo apt-get install -y robotpkg-hpp-fcl robotpkg-eiquadprog \
-    robotpkg-pinocchio
+apt install -y robotpkg-hpp-fcl robotpkg-eiquadprog \
+    robotpkg-pinocchio=2.7.0 robotpkg-py38-pinocchio=2.7.0 robotpkg-py38-eigenpy=2.7.11
 
 export PATH=/opt/openrobots/bin:$PATH 
 export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
@@ -113,16 +115,6 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
 && rosdep install -r -y --from-paths ${WORKSPACE_UR}/src ${WORKSPACE_RR100}/src --ignore-src --rosdistro ${ROS_DISTRO} \
 && apt-get upgrade -y \
 && rm -rf /var/lib/apt/lists/*
-
-# WORKDIR ${WORKSPACE_UR}
-
-# # Install all workspace packages dependencies
-# RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
-# && apt-get update \
-# && rosdep update \
-# && rosdep install -r -y --from-paths ./src --ignore-src --rosdistro ${ROS_DISTRO} \
-# && apt-get upgrade -y \
-# && rm -rf /var/lib/apt/lists/*
 
 
 FROM rosdep-install as dev

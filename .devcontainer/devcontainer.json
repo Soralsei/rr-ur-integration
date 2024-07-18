@@ -8,7 +8,8 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "../Dockerfile",
 		"options": [
-			"--progress=plain"
+			"--progress=plain",
+			"--no-cache-filter=cacher"
 		],
 		"target": "dev"
 	},
@@ -42,7 +43,7 @@
 		}
 	},
 
-	"workspaceMount": "source=${localWorkspaceFolder},target=/root/ros//integration_ws,type=bind,consistency=cached",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/root/ros/integration_ws,type=bind,consistency=cached",
 	"workspaceFolder": "/root/ros/integration_ws",
 	"privileged": true,
 	"runArgs": [
