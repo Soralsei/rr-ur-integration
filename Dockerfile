@@ -58,8 +58,17 @@ echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/robotpkg.asc] http://robotpkg.
     | tee /etc/apt/sources.list.d/robotpkg.list
 
 apt update
-apt install -y robotpkg-hpp-fcl robotpkg-eiquadprog \
-    robotpkg-pinocchio=2.7.0 robotpkg-py38-pinocchio=2.7.0 robotpkg-py38-eigenpy=2.7.11
+apt install -y --allow-downgrades \
+    python3-dev libpython3-dev \
+    libboost-python-dev \
+    doxygen libjsoncpp-dev \
+    robotpkg-py38-eigenpy=3.1.1 \
+    robotpkg-hpp-fcl=2.3.6 \
+    robotpkg-pinocchio=2.6.20 \
+    robotpkg-py38-eigenpy=3.1.1  \
+    robotpkg-py38-hpp-fcl=2.3.6 \
+    robotpkg-py38-pinocchio=2.6.20 \
+    robotpkg-eiquadprog
 
 export PATH=/opt/openrobots/bin:$PATH 
 export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
@@ -83,12 +92,12 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DEigen3_DIR=/opt/eigen/3.4/share/eigen3/cmake/
 make -j 24 install
 
-echo "export PATH=/opt/openrobots/bin:$PATH\n \
-export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH\n \
-export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH\n \
-export PYTHONPATH=/opt/openrobots/lib/python3.8/site-packages:$PYTHONPATH\n \
-export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH\n \
-export PYTHONPATH=/usr/local/lib/python3.8/site-packages:$PYTHONPATH" >> ~/.bashrc
+echo "export PATH=/opt/openrobots/bin:$PATH\n\
+export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH\n\
+export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH\n\
+export PYTHONPATH=/opt/openrobots/lib/python3.8/site-packages:$PYTHONPATH\n\
+export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH\n\
+export PYTHONPATH=/usr/local/lib/python3/site-packages:$PYTHONPATH" >> ~/.bashrc
 
 EOF
 
@@ -136,11 +145,9 @@ EOF
 WORKDIR ${WORKSPACE_UR}
 RUN <<-EOF
     . ${WORKSPACE_RR100}/devel/setup.sh && catkin_make
-    ls
     echo "source ${WORKSPACE_UR}/devel/setup.bash" >> ~/.bashrc
     # python3 -m pip install --upgrade pip && pip install --ignore-installed -r requirements.txt
 EOF
-
 
 
 FROM rosdep-install as release
