@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <arg name="laserscan_topic" default="/rslidar_laserscan"
+        doc="The topic in which the LiDAR laserscan data is published" />
+    <arg name="unfiltered_pointcloud_topic" default="/rslidar_points"
+        doc="The topic in which the LiDAR pointcloud data is published" />
+    <arg name="pointcloud_topic" default="/rslidar_points/filtered"
+        doc="The topic in which the LiDAR pointcloud data is published" />
+
+    <arg name="use_pointcloud_nodelets" default="true" />
+    <arg name="nodelet_manager" default="rslidar_nodelet_manager" doc="Nodelet manager name" />
+
+    <arg name="imu_topic" default="/imu/data" doc="The topic in which the IMU data is published" />
+    <arg name="odom_topic" default="/rr100_steering_controller/odom"
+        doc="The topic in which the robot's odometry data is published" />
+
+    <arg name="cmd_vel_topic" default="/raw_cmd_vel"
+        doc="The topic in which velocity commands are published" />
+
+    <arg name="cam_rgb_topic" default="/camera/color/image_raw"
+        doc="The RGB image camera topic" />
+
+    <arg name="simulated" default="false" doc="Whether the robot is simulated" />
+    <arg name="use_rviz" default="true" />
+
+    <arg name="use_static_map" default="true" />
+    <arg name="generate_map" default="true" />
+    <arg name="map_resolution" default="0.05" doc="Map cell resolution" />
+    <arg name="map_path" default="$(find rr100_navigation)/maps/map.posegraph"
+        doc="Map (posegraph format) file path" />
+
+    <arg name="global_costmap_width" default="100.0"
+        doc="Global costmap width (in meters) if no static map is specified" />
+    <arg name="global_costmap_height" default="100.0"
+        doc="Global costmap height (in meters) if no static map is specified" />
+
+    <include file="$(find rr100_navigation)/launch/rr100_navigation.launch" pass_all_args="true" />
+
+    <!-- Filter points that might hit the robot arm -->
+    <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen"
+        unless="$(arg use_pointcloud_nodelets)" />
+    <arg name="manager" value="$(arg nodelet_manager)" if="$(arg use_pointcloud_nodelets)" />
+    <arg name="manager" value="pcl_manager" unless="$(arg use_pointcloud_nodelets)" />
+    <!-- Run a passthrough filter to clean NaNs -->
+    <node pkg="nodelet" type="nodelet" name="cropbox_filter"
+        args="load pcl/CropBox $(arg manager)" output="screen">
+        <remap from="~input" to="$(arg unfiltered_pointcloud_topic)" />
+        <remap from="~output" to="$(arg pointcloud_topic)" />
+        <rosparam command="load" file="$(find rr100_ur_navigation)/config/filter_config.yaml" />
+    </node>
+</launch>

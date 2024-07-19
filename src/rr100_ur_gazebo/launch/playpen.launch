@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <arg name="x" default="0.0" />
+    <arg name="y" default="0.0" />
+    <arg name="z" default="0.0" />
+    <arg name="yaw" default="0.0" />
+
+    <arg name="realsense_enabled" default="true" />
+    <arg name="gps_enabled" default="false" />
+    <arg name="rslidar_enabled" default="true" />
+    <arg name="realsense_laserscan" default="false"
+        doc="Convert realsense point cloud to laser scan" />
+
+    <arg name="gui" default="true" doc="Launch with the gazebo GUI" />
+    <arg name="debug" default="false" />
+    <arg name="verbose" default="false" />
+
+    <include file="$(find rr100_ur_gazebo)/launch/rr_ur_bringup.launch" pass_all_args="true" />
+
+    <include file="$(find rr100_gazebo)/launch/playpen.launch">
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="verbose" value="$(arg verbose)" />
+        <arg name="use_gui" value="$(arg gui)" />
+    </include>
+</launch>

@@ -1,0 +1,12 @@
+input_frame: 'base_footprint'
+
+negative: true
+
+min_x: -0.91962 # meters
+max_x:  0.45981 # m
+
+min_y: -0.32925 # m
+max_y:  0.32925 # m
+
+min_z: 0.0 # m
+max_z: 1.0 # m
