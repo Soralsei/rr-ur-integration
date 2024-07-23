@@ -2,3 +2,4 @@ devel
 build
 log
 .catkin_workspace
+*.png

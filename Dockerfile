@@ -50,20 +50,16 @@ FROM apt-depends as placo-builder
 
 WORKDIR /root/
 RUN <<-EOF
-apt install -qqy lsb-release curl
+apt-get install -qqy lsb-release curl
 mkdir -p /etc/apt/keyrings
 curl http://robotpkg.openrobots.org/packages/debian/robotpkg.asc \
     | tee /etc/apt/keyrings/robotpkg.asc
 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/robotpkg.asc] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" \
     | tee /etc/apt/sources.list.d/robotpkg.list
 
-apt update
-apt install -y --allow-downgrades \
-    python3-dev libpython3-dev \
-    libboost-python-dev \
+apt-get update
+apt-get install -y --allow-downgrades \
     doxygen libjsoncpp-dev \
-    robotpkg-py38-eigenpy=3.1.1 \
-    robotpkg-hpp-fcl=2.3.6 \
     robotpkg-pinocchio=2.6.20 \
     robotpkg-py38-eigenpy=3.1.1  \
     robotpkg-py38-hpp-fcl=2.3.6 \
@@ -97,7 +93,7 @@ export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH\n\
 export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH\n\
 export PYTHONPATH=/opt/openrobots/lib/python3.8/site-packages:$PYTHONPATH\n\
 export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH\n\
-export PYTHONPATH=/usr/local/lib/python3/site-packages:$PYTHONPATH" >> ~/.bashrc
+export PYTHONPATH=/usr/local/lib/python3/dist-packages:$PYTHONPATH" >> ~/.bashrc
 
 EOF
 
@@ -146,7 +142,6 @@ WORKDIR ${WORKSPACE_UR}
 RUN <<-EOF
     . ${WORKSPACE_RR100}/devel/setup.sh && catkin_make
     echo "source ${WORKSPACE_UR}/devel/setup.bash" >> ~/.bashrc
-    # python3 -m pip install --upgrade pip && pip install --ignore-installed -r requirements.txt
 EOF
 
 
