@@ -1,6 +1,8 @@
 import rospy
 
 import numpy as np
+from itertools import product
+from typing import Sequence, Union, SupportsIndex
 
 from actionlib import SimpleActionClient
 from ur5_kinematics.msg import URGoToAction, URGoToGoal, URGoToResult
@@ -16,10 +18,14 @@ import matplotlib.pyplot as plt
 import sys, json, math
 
 class WorkspaceSampler():
-    def __init__(self, frame, collision_service: str, kinematics_topic: str, n_points: int, xrange: list, yrange: list, zrange: list, angle_cone: float = np.pi / 4, prefix: str = ''):
+    def __init__(self, frame, collision_service: str, kinematics_topic: str, n_points: Union[SupportsIndex, Sequence[SupportsIndex]], xrange: list, yrange: list, zrange: list, angle_cone: float = np.pi / 4, prefix: str = ''):
         self.prefix = prefix
         self.seq = 0.0
-        self.rng = np.random.default_rng(123)
+        
+        if len(n_points) == 1:
+            n_points = n_points[0], n_points[0], n_points[0]
+            
+        assert len(n_points) == 3
         
         self.kinematics_client = SimpleActionClient(kinematics_topic, URGoToAction)
         self.collisions_checker = rospy.ServiceProxy(collision_service, CheckCollision)
@@ -30,8 +36,10 @@ class WorkspaceSampler():
         self.collisions_checker.wait_for_service()
         rospy.loginfo(f'Connected to kinematics action server')
         
-        ranges = list(zip(xrange, yrange, zrange))
-        sample = self.rng.uniform(ranges[0], ranges[1], size=(n_points, 3))
+        self.xs = np.linspace(xrange[0], xrange[1], num=n_points[0])
+        self.ys = np.linspace(yrange[0], yrange[1], num=n_points[1])
+        self.zs = np.linspace(zrange[0], zrange[1], num=n_points[2])
+        self.sample = list(product(self.xs, self.ys, self.zs))
         
         self.joint_states_pub = rospy.Publisher("/joint_states", JointState, queue_size=10, latch=True)
         self.joint_names = [
@@ -44,7 +52,14 @@ class WorkspaceSampler():
             f'{prefix}hande_left_finger_joint'
         ]
         
-        self.targets = [ptf.translation_matrix(point) @ ptf.euler_matrix(np.pi, 0, 0) for point in sample]                
+        state = JointState()
+        state.header = Header()
+        state.header.stamp = rospy.Time.now()
+        state.name = self.joint_names
+        state.position = [3.14, -1.57, 1.57, -1.57, -1.57, 1.57, 0.0]
+        self.joint_states_pub.publish(state)
+        
+        self.targets = [ptf.translation_matrix(point) @ ptf.euler_matrix(np.pi, 0, 0) for point in self.sample]
         self.target_poses = [WorkspaceSampler.matrix_to_pose(target, self.frame) for target in self.targets]
 
 
@@ -53,18 +68,11 @@ class WorkspaceSampler():
         reachable = []
         rejected = []
         
-        state = JointState()
-        state.header = Header()
-        state.header.stamp = rospy.Time.now()
-        state.name = self.joint_names
-        state.position = [3.14, -1.57, 1.57, -1.57, -1.57, 1.57, 0.0]
-        self.joint_states_pub.publish(state)
-        
         for i, target in enumerate(self.target_poses):
             goal = URGoToGoal()
             goal.target_pose = target
             goal.timeout = 1.0
-            goal.duration = rospy.Duration(secs=4.0)
+            goal.duration = rospy.Duration(secs=10.0)
             goal.target_pose.header.seq = self.seq
             
             self.kinematics_client.send_goal_and_wait(goal)
@@ -89,6 +97,7 @@ class WorkspaceSampler():
                     rejected.append(self.targets[i])
             else:
                 rejected.append(self.targets[i])
+                
             self.seq += 1
             
         return reachable, rejected
@@ -96,7 +105,8 @@ class WorkspaceSampler():
 
     def sample_manipulable_points(self, points) -> list:
         manipulable = []
-        space = np.linspace(0.0, np.pi)
+        rejected = []
+        space = np.linspace(0.0, np.pi * 2, num=10)
         for point in points:
             n_reached = 0
             for t in space:
@@ -104,9 +114,14 @@ class WorkspaceSampler():
                 y_theta = np.pi + self.angle * math.sin(t)
                 rot = ptf.euler_matrix(x_theta, y_theta, 0.0)
                 
-                target = WorkspaceSampler.matrix_to_pose(point + rot)
+                target = WorkspaceSampler.matrix_to_pose(point @ rot)
+                goal = URGoToGoal()
+                goal.target_pose = target
+                goal.timeout = 1.0
+                goal.duration = rospy.Duration(secs=10.0)
+                goal.target_pose.header.seq = self.seq
                 
-                self.kinematics_client.send_goal_and_wait(target)
+                self.kinematics_client.send_goal_and_wait(goal)
                 result: URGoToResult = self.kinematics_client.get_result()
                 if result.state == URGoToResult.SUCCEEDED:
                     self.seq += 1
@@ -114,15 +129,28 @@ class WorkspaceSampler():
                     state.header = Header()
                     state.header.stamp = rospy.Time.now()
                     state.name = self.joint_names
-                    state.position = result.trajectory.points[-1].positions
+                    state.position = list(result.trajectory.points[-1].positions)
                     state.position.append(0.0)
-                    self.joint_states_pub.publish(state)
+                    
                     n_reached += 1
+        
+                    req = CheckCollisionRequest()
+                    req.joints = state
+                    ret = self.collisions_checker.call(req)
+                    
+                    if not ret.isColliding:
+                        n_reached += 1
+                        self.joint_states_pub.publish(state)
+                        
             # If we reach an arbitrary amount of angles (here 80%)
             # at the target pose, keep track
             if n_reached / len(space) >= 0.8:
                 manipulable.append(point)
-        return manipulable
+            else:
+                rejected.append(point)
+            self.seq += 1
+
+        return manipulable, rejected
 
 
     @staticmethod
