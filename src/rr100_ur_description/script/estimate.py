@@ -21,7 +21,6 @@ class WorkspaceSampler():
     def __init__(self, frame, collision_service: str, kinematics_topic: str, n_points: Union[SupportsIndex, Sequence[SupportsIndex]], xrange: list, yrange: list, zrange: list, angle_cone: float = np.pi / 4, prefix: str = ''):
         self.prefix = prefix
         self.seq = 0.0
-        
         if len(n_points) == 1:
             n_points = n_points[0], n_points[0], n_points[0]
             
@@ -72,7 +71,7 @@ class WorkspaceSampler():
             goal = URGoToGoal()
             goal.target_pose = target
             goal.timeout = 1.0
-            goal.duration = rospy.Duration(secs=10.0)
+            goal.duration = rospy.Duration(secs=1.0)
             goal.target_pose.header.seq = self.seq
             
             self.kinematics_client.send_goal_and_wait(goal)

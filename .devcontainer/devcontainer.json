@@ -8,8 +8,8 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "../Dockerfile",
 		"options": [
-			"--progress=plain",
-			"--no-cache-filter=cacher"
+			"--progress=plain"
+			// "--no-cache-filter=cacher"
 		],
 		"target": "dev"
 	},

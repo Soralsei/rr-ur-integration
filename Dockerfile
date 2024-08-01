@@ -1,5 +1,6 @@
 ARG WORKSPACE_RR100=/root/ros/rr100_ws
 ARG WORKSPACE_UR=/root/ros/ur_ws
+ARG WORKSPACE=/root/ros/integration_ws
 ARG FROM_IMAGE=ros:noetic
 ARG IP=192.168.0.64
 ARG BUILD_SHA
@@ -28,14 +29,12 @@ RUN --mount=type=cache,target=/var/cache/apt \
 apt-get update && apt-get install --no-install-recommends -y git
 
 WORKDIR ${WORKSPACE_RR100}
-# ADD "https://api.github.com/repos/Soralsei/rr100-rhoban/commits?per_page=1" latest_commit
-# rm -f latest_commit &&
-RUN git clone https://github.com/Soralsei/rr100-rhoban.git . && git submodule update --init --recursive 
+ADD "https://api.github.com/repos/Soralsei/rr100-rhoban/commits?per_page=1" latest_commit
+RUN rm -f latest_commit && git clone https://github.com/Soralsei/rr100-rhoban.git . && git submodule update --init --recursive 
 
 WORKDIR ${WORKSPACE_UR}
-# ADD "https://api.github.com/repos/Soralsei/ur5-rhoban/commits?per_page=1" latest_commit
-# rm -f latest_commit &&
-RUN git clone https://github.com/Soralsei/ur5-rhoban.git . && git submodule update --init --recursive
+ADD "https://api.github.com/repos/Soralsei/ur5-rhoban/commits?per_page=1" latest_commit
+RUN rm -f latest_commit && git clone https://github.com/Soralsei/ur5-rhoban.git . && git submodule update --init --recursive
 
 # Separate package.xml files in /tmp directory
 WORKDIR /root/ros
@@ -50,6 +49,7 @@ FROM apt-depends as placo-builder
 
 WORKDIR /root/
 RUN <<-EOF
+set -e
 apt-get install -qqy lsb-release curl
 mkdir -p /etc/apt/keyrings
 curl http://robotpkg.openrobots.org/packages/debian/robotpkg.asc \
@@ -60,6 +60,7 @@ echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/robotpkg.asc] http://robotpkg.
 apt-get update
 apt-get install -y --allow-downgrades \
     doxygen libjsoncpp-dev \
+    robotpkg-hpp-fcl=2.3.6 \
     robotpkg-pinocchio=2.6.20 \
     robotpkg-py38-eigenpy=3.1.1  \
     robotpkg-py38-hpp-fcl=2.3.6 \
@@ -94,7 +95,6 @@ export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH\n\
 export PYTHONPATH=/opt/openrobots/lib/python3.8/site-packages:$PYTHONPATH\n\
 export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH\n\
 export PYTHONPATH=/usr/local/lib/python3/dist-packages:$PYTHONPATH" >> ~/.bashrc
-
 EOF
 
 
@@ -117,9 +117,7 @@ COPY --from=cacher /tmp/${WORKSPACE_UR}/src ${WORKSPACE_UR}/src
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
 && apt-get update \
 && rosdep update \
-&& rosdep install -r -y --from-paths ${WORKSPACE_UR}/src ${WORKSPACE_RR100}/src --ignore-src --rosdistro ${ROS_DISTRO} \
-&& apt-get upgrade -y \
-&& rm -rf /var/lib/apt/lists/*
+&& rosdep install -r -y --from-paths ${WORKSPACE_UR}/src ${WORKSPACE_RR100}/src --ignore-src --rosdistro ${ROS_DISTRO}
 
 
 FROM rosdep-install as dev
@@ -129,20 +127,26 @@ ARG WORKSPACE_UR
 ENV WORKSPACE_RR100=${WORKSPACE_RR100}
 ENV WORKSPACE_UR=${WORKSPACE_UR}
 
+
 COPY --from=cacher ${WORKSPACE_RR100} ${WORKSPACE_RR100}
 COPY --from=cacher ${WORKSPACE_UR} ${WORKSPACE_UR}
 
 WORKDIR ${WORKSPACE_RR100}
 RUN <<-EOF
-    . /opt/ros/${ROS_DISTRO}/setup.sh && catkin_make
-    echo "source ${WORKSPACE_RR100}/devel/setup.bash" >> ~/.bashrc
+. /opt/ros/${ROS_DISTRO}/setup.sh && catkin_make
+echo "source ${WORKSPACE_RR100}/devel/setup.bash" >> ~/.bashrc
 EOF
 
 WORKDIR ${WORKSPACE_UR}
+RUN pip install -r  requirements.txt
 RUN <<-EOF
     . ${WORKSPACE_RR100}/devel/setup.sh && catkin_make
     echo "source ${WORKSPACE_UR}/devel/setup.bash" >> ~/.bashrc
 EOF
+
+WORKDIR ${WORKSPACE}
+COPY requirements.txt .
+RUN pip install -r  requirements.txt
 
 
 FROM rosdep-install as release

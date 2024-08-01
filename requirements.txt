@@ -1,0 +1,4 @@
+jupyterlab
+mayavi
+configobj
+PySide2
