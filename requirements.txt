@@ -2,3 +2,5 @@ jupyterlab
 mayavi
 configobj
 PySide2
+pyyaml
+meshcat
