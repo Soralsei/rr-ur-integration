@@ -117,7 +117,7 @@ class WorkspaceSampler():
                 goal = URGoToGoal()
                 goal.target_pose = target
                 goal.timeout = 1.0
-                goal.duration = rospy.Duration(secs=10.0)
+                goal.duration = rospy.Duration(secs=1.0)
                 goal.target_pose.header.seq = self.seq
                 
                 self.kinematics_client.send_goal_and_wait(goal)

@@ -2,9 +2,9 @@
 
 <launch>
 
-    <arg name="rslidar_enabled" default="false" />
-    <arg name="realsense_enabled" default="false" />
-    <arg name="gps_enabled" default="false" />
+    <arg name="rslidar_enabled" default="true" />
+    <arg name="realsense_enabled" default="true" />
+    <arg name="gps_enabled" default="true" />
 
     <!--ur5e
     parameters files -->

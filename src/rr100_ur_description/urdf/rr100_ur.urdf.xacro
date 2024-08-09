@@ -1,8 +1,5 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="chassis">
-    <xacro:include filename="$(find rr100_description)/urdf/rr100.urdf.xacro" />
-    <xacro:include filename="$(find ur5e_gripper_description)/urdf/ur_hand_e.xacro" />
-
     <!-- Base Size -->
     <xacro:property name="chassis_x_size" value="0.80" />
     <xacro:property name="base_y_size" value="0.280" />
@@ -14,9 +11,12 @@
     <xacro:property name="plate_rear_distance" value="0.05"/>
     <xacro:property name="plate_width" value="0.25" />
     <xacro:property name="plate_height" value="0.2" />
-    <xacro:property name="plate_thickness" value="0.01" />
+    <!-- Actual value -->
+    <xacro:property name="plate_thickness" value="0.01" /> 
+     <!-- Elevated value -->
+    <!-- <xacro:property name="plate_thickness" value="0.40" />  -->
 
-    <xacro:property name="rail_size" value="0.02" />
+    <xacro:property name="rail_size" value="0.025" />
 
     <xacro:property name="M_PI" value="3.14159" />
 
@@ -36,34 +36,41 @@
 
     <xacro:arg name="ur_prefix" default="ur_"/>
 
+    <xacro:include filename="$(find rr100_description)/urdf/rr100.urdf.xacro" />
+    <xacro:include filename="$(find ur5e_gripper_description)/urdf/ur_hand_e.xacro" />
+
     <link name="mounting_base_link">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 ${M_PI / 2}" />
-
             <geometry>
+                <!-- Actual -->
                 <mesh filename="package://rr100_ur_description/meshes/ur5_mounting_plate.stl"
                     scale="0.001 0.001 0.001" />
+                <!-- Elevated -->
+                <!-- <mesh filename="package://rr100_ur_description/meshes/ur5_mounting_plate_shifted.stl"
+                    scale="0.001 0.001 0.04" /> -->
             </geometry>
             <material name="grey" />
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0" />
+            <origin xyz="0 0 0" rpy="0 0 ${M_PI / 2}" />
             <geometry>
+                <!-- Actual -->
                 <mesh filename="package://rr100_ur_description/meshes/ur5_mounting_plate.stl"
                     scale="0.001 0.001 0.001" />
+                <!-- <box size="${plate_width} ${plate_height} ${plate_thickness}"/> -->
             </geometry>
         </collision>
     </link>
     <joint name="mounting_base_joint" type="fixed">
         <!-- ${-base_x_size/2 + 0.025 + 0.2 / 2} 0 ${base_z_size} -->
         <origin
-            xyz="${-chassis_x_size/2 + plate_rear_distance + plate_height / 2} 0 ${(base_z_size + ground_clearance) / 2 + plate_thickness + plate_thickness / 2 + rail_size}"
+            xyz="${-chassis_x_size/2 + plate_rear_distance + plate_height / 2} 0 ${(base_z_size + ground_clearance) / 2 + plate_thickness / 2 + rail_size}"
             rpy="0 0 0" />
         <parent link="base_link" />
         <child link="mounting_base_link" />
     </joint>
-    <gazebo reference="mounting_base_link">
-    </gazebo>
+    <gazebo reference="mounting_base_link"/>
 
     <xacro:ur5_hand_e
         prefix="$(arg ur_prefix)"
@@ -77,6 +84,9 @@
         safety_k_position="$(arg safety_k_position)" />
     
     <joint name="ur_base_joint" type="fixed">
+        <origin
+            xyz="0 0 ${plate_thickness / 2}"
+            rpy="0 0 0" />
         <parent link="mounting_base_link"/>
         <child link="$(arg ur_prefix)base_link"/>
     </joint>
