@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "math.hpp"
+#include "math.h"
 
 namespace rhoban
 {
@@ -12,8 +12,8 @@ namespace rhoban
     class LineIterator
     {
     private:
-        math::Point<int> current;
-        math::Point<int> start, end;
+        math::Vector2<int> current;
+        math::Vector2<int> start, end;
 
         int dx, dy; // Difference between x start/end and y respectively
         int x_inc_uncond, y_inc_uncond;
@@ -24,8 +24,8 @@ namespace rhoban
         int current_pixel, num_pixels;
 
     public:
-        LineIterator(math::Point<int> start_, math::Point<int> end_)
-            : current(start_), start(start_), end(end_), current_pixel(0)
+        LineIterator(const math::Vector2<int> &start_, const math::Vector2<int> &end_)
+            : current(start_), start(start_), end(end_), current_pixel(0), error(0), slope(0), errorInc(0)
         {
             int xtemp = end.x - start.x;
             int ytemp = end.y - start.y;
@@ -35,6 +35,9 @@ namespace rhoban
 
             x_inc_uncond = math::sign(xtemp);
             y_inc_uncond = math::sign(ytemp);
+
+            x_inc_cond = x_inc_uncond;
+            y_inc_cond = y_inc_uncond;
 
             // Octant 0-3 (more horizontal than vertical)
             if (dx >= dy)
@@ -62,7 +65,7 @@ namespace rhoban
             }
         }
 
-        ~LineIterator();
+        ~LineIterator() {}
 
         bool endReached()
         {
@@ -79,20 +82,21 @@ namespace rhoban
                 error += errorInc;
             }
             current.x += x_inc_uncond;            
-            current.y += y_inc_uncond;            
+            current.y += y_inc_uncond;
+            current_pixel++;         
         }
 
-        math::Point<int> getCurrent()
+        math::Vector2<int> getCurrent()
         {
             return current;
         }
 
-        math::Point<int> getStart()
+        math::Vector2<int> getStart()
         {
             return start;
         }
 
-        math::Point<int> getEnd()
+        math::Vector2<int> getEnd()
         {
             return end;
         }

@@ -146,23 +146,4 @@ EOF
 
 WORKDIR ${WORKSPACE}
 COPY requirements.txt .
-RUN pip install -r  requirements.txt
-
-
-FROM rosdep-install as release
-ARG WORKSPACE
-
-WORKDIR ${WORKSPACE}
-
-# Copy project files
-COPY src src
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh && catkin_make
-
-ENV WORKSPACE=$WORKSPACE
-RUN sed --in-place --expression \
-    '$isource "$WORKSPACE/devel/setup.bash"' \
-    /ros_entrypoint.sh \
-    && echo "source $WORKSPACE/devel/setup.bash" >> ~/.bashrc
-
-RUN python3 -m pip install --upgrade pip \
-&& pip install --ignore-installed -r requirements.txt
+RUN pip install -r  requirements.txt && apt install pciutils x11-xserver-utils --no-install-recommends -y 

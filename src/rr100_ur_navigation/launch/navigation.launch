@@ -41,7 +41,7 @@
         unless="$(arg use_pointcloud_nodelets)" />
     <arg name="manager" value="$(arg nodelet_manager)" if="$(arg use_pointcloud_nodelets)" />
     <arg name="manager" value="pcl_manager" unless="$(arg use_pointcloud_nodelets)" />
-    <!-- Run a passthrough filter to clean NaNs -->
+
     <node pkg="nodelet" type="nodelet" name="cropbox_filter"
         args="load pcl/CropBox $(arg manager)" output="screen">
         <remap from="~input" to="$(arg unfiltered_pointcloud_topic)" />
