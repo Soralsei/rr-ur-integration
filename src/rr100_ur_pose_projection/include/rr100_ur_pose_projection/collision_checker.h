@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <Eigen/Dense>
 
 #include "nav_msgs/OccupancyGrid.h"
 #include "geometry_msgs/Point32.h"
@@ -8,7 +9,7 @@
 #include "geometry_msgs/Pose.h"
 
 #include "ros/ros.h"
-#include "util/math.h"
+// #include "util/math.h"
 
 namespace rhoban
 {
@@ -40,12 +41,13 @@ namespace rhoban
         bool isCollisionFree(const PoseMsg &currentPose, const PoseMsg &targetPose);
 
     private:
-        double lineCost(const math::Vector2<int> &start, const math::Vector2<int> &end) const;
-        double pointCost(const math::Vector2<int> &point) const;
-        math::Vector2<int> worldToMap(const float x, const float y) const;
+        double lineCost(const Eigen::Vector2i &start, const Eigen::Vector2i &end) const;
+        double pointCost(int x, int y) const;
+        Eigen::Vector2i worldToMap(const float x, const float y) const;
+        Eigen::Vector2f mapToWorld(const int x, const int y) const;
 
         double footprintCost(const Footprint &footprint) const;
-        Footprint getFootprintAt(math::Vector2<float> position, float theta, math::Vector2<float> targetPosition, float targetTheta);
+        Footprint getFootprintAt(Eigen::Vector2f position, float theta, Eigen::Vector2f targetPosition, float targetTheta);
     };
 
 } // namespace rhoban

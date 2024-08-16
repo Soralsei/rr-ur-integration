@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <Eigen/Dense>
 
 #include "rr100_ur_pose_projection/footprint_subscriber.h"
 #include "rr100_ur_pose_projection/footprint.h"
@@ -28,12 +29,11 @@ namespace rhoban
         return mFootprint->polygon.points;
     }
 
-    Footprint FootprintSubscriber::getFootprintInRobotFrame(math::Vector2<float> position, float theta)
+    Footprint FootprintSubscriber::getFootprintInRobotFrame(Eigen::Vector2f position, float theta)
     {
         Footprint footprint = getFootprintRaw();
-
         Footprint tmp = transformFootprint(footprint, -position, 0.0);
-        footprint = transformFootprint(tmp, math::Vector2<float>{}, -theta);
+        footprint = transformFootprint(tmp, Eigen::Vector2f {0,0}, -theta);
 
         return footprint;
     }

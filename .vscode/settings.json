@@ -80,6 +80,11 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "bit": "cpp",
-        "*.ipp": "c"
+        "*.ipp": "c",
+        "core": "cpp",
+        "numericaldiff": "cpp",
+        "specialfunctions": "cpp",
+        "valarray": "cpp",
+        "dense": "cpp"
     }
 }

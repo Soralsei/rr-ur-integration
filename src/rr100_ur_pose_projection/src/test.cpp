@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <Eigen/Dense>
 
 #include "rr100_ur_pose_projection/collision_checker.h"
 #include "rr100_ur_pose_projection/footprint_subscriber.h"
@@ -59,9 +60,10 @@ int main(int argc, char *argv[])
     // rhoban::FootprintSubscriber fsub{nh, "/move_base_rr100/global_costmap/footprint"};
     // rhoban::MapSubscriber msub{nh, "/map"};
     rhoban::CollisionChecker col_checker {nh, "/move_base_rr100/global_costmap/footprint", "/map"};
+    // rhoban::CollisionChecker col_checker {nh, "/move_base_rr100/global_costmap/footprint", "/move_base_rr100/global_costmap/costmap"};
 
-    auto pos = rhoban::math::Vector2<float>{5.929, -0.522};
-    float theta = -1.416;
+    // auto pos = Eigen::Vector2f{5.929, -0.522};
+    // float theta = -1.416;
 
     // auto pose = geometry_msgs::Pose{};
     // pose.position.x = 5.929;

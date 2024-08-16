@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <Eigen/Dense>
 
 #include "rr100_ur_pose_projection/collision_checker.h"
 #include "rr100_ur_pose_projection/map_subscriber.h"
@@ -38,8 +39,8 @@ namespace rhoban
             throw e;
         }
 
-        const math::Vector2<float> currentPosition{currentPose.position.x, currentPose.position.y};
-        const math::Vector2<float> targetPosition{targetPose.position.x, targetPose.position.y};
+        const Eigen::Vector2f currentPosition{currentPose.position.x, currentPose.position.y};
+        const Eigen::Vector2f targetPosition{targetPose.position.x, targetPose.position.y};
 
         const float currentTheta = tf2::getYaw(currentPose.orientation);
         const float targetTheta = tf2::getYaw(targetPose.orientation);
@@ -48,7 +49,7 @@ namespace rhoban
 
         try
         {
-            worldToMap(targetPosition.x, targetPosition.y);
+            worldToMap(targetPosition[0], targetPosition[1]);
         }
         catch (const std::exception &e)
         {
@@ -62,7 +63,7 @@ namespace rhoban
     {
         try
         {
-            return scorePose(currentPose, targetPose) >= 0.0;
+            return scorePose(currentPose, targetPose) != LETHAL_COST;
         }
         catch (const std::exception &e)
         {
@@ -71,34 +72,58 @@ namespace rhoban
         return false;
     }
 
-    Footprint CollisionChecker::getFootprintAt(math::Vector2<float> position, float theta, math::Vector2<float> targetPosition, float targetTheta)
+    Footprint CollisionChecker::getFootprintAt(Eigen::Vector2f position, float theta, Eigen::Vector2f targetPosition, float targetTheta)
     {
         Footprint footprint = mFootprintSubscriber->getFootprintInRobotFrame(position, theta);
         return transformFootprint(footprint, targetPosition, targetTheta);
     }
 
-    math::Vector2<int> CollisionChecker::worldToMap(const float x, const float y) const
+    Eigen::Vector2i CollisionChecker::worldToMap(const float x, const float y) const
     {
         int width = mMap->info.width;
         int height = mMap->info.height;
-
         float resolution = mMap->info.resolution;
+        auto mapOrigin = mMap->info.origin.position;
 
-        auto origin = mMap->info.origin.position;
+        Eigen::Vector2f coords{x, y};
+        Eigen::Vector2f origin{mapOrigin.x, mapOrigin.y};
 
-        int cellX = (x - origin.x) / resolution;
-        int cellY = (y - origin.y) / resolution;
+        Eigen::Vector2i cell = ((coords - origin) / resolution).cast<int>();
 
-        if (cellX >= width || cellX < 0)
+        if (cell[0] >= width || cell[0] < 0)
         {
             throw IllegalPoseException(format("X coordinate %.2f is outside of map grid", x).c_str());
         }
-        if (cellY >= height || cellY < 0)
+        if (cell[1] >= height || cell[1] < 0)
         {
             throw IllegalPoseException(format("Y coordinate %.2f is outside of map grid", y).c_str());
         }
 
-        return math::Vector2<int>{cellX, cellY};
+        return cell;
+    }
+
+    Eigen::Vector2f CollisionChecker::mapToWorld(const int x, const int y) const
+    {
+        int width = mMap->info.width;
+        int height = mMap->info.height;
+        float resolution = mMap->info.resolution;
+        auto mapOrigin = mMap->info.origin.position;
+
+        Eigen::Vector2f origin{mapOrigin.x, mapOrigin.y};
+        Eigen::Vector2f coords{x, y};
+
+        Eigen::Vector2f cell = coords * resolution + origin;
+
+        if (cell[0] >= width || cell[0] < 0)
+        {
+            throw IllegalPoseException(format("X coordinate %.2f is outside of map grid", x).c_str());
+        }
+        if (cell[1] >= height || cell[1] < 0)
+        {
+            throw IllegalPoseException(format("Y coordinate %.2f is outside of map grid", y).c_str());
+        }
+
+        return cell;
     }
 
     double CollisionChecker::footprintCost(const Footprint &footprint) const
@@ -110,10 +135,11 @@ namespace rhoban
         {
             try
             {
-                math::Vector2<int> start = worldToMap(footprint[j].x, footprint[j].y);
-                math::Vector2<int> end = worldToMap(footprint[i].x, footprint[i].y);
-                ROS_INFO("Inspecting line (%d, %d) -> (%d, %d), cost : %.2f", start.x, start.y, end.x, end.y, cost);
+                Eigen::Vector2i start = worldToMap(footprint[j].x, footprint[j].y);
+                Eigen::Vector2i end = worldToMap(footprint[i].x, footprint[i].y);
+                ROS_INFO("Inspecting line (%d, %d) -> (%d, %d)", start[0], start[1], end[0], end[1]);
                 cost = std::max(cost, lineCost(start, end));
+                ROS_INFO("cost : %.2f", cost);
             }
             catch (const std::exception &e)
             {
@@ -123,20 +149,48 @@ namespace rhoban
 
             if (cost == LETHAL_COST)
             {
-                break;
+                return cost;
+            }
+        }
+
+        auto bounds = getFootprintBounds(footprint);
+        Eigen::Vector2i min;
+        Eigen::Vector2i max;
+        try
+        {
+            min = worldToMap(bounds[0], bounds[2]);
+            max = worldToMap(bounds[1], bounds[3]);
+        }
+        catch (const std::exception &e)
+        {
+            ROS_ERROR("%s", e.what());
+            return static_cast<double>(LETHAL_COST);
+        }
+        for (size_t y = min[1]; y < max[1]; y++)
+        {
+            for (size_t x = min[0]; x < max[0]; x++)
+            {
+                double pcost = pointCost(x, y);
+                if (pcost > 0 && isInsideFootprint(footprint, mapToWorld(x, y)))
+                {
+                    if (pcost == LETHAL_COST)
+                    {
+                        return static_cast<double>(LETHAL_COST);
+                    }
+                    cost = std::max(cost, pcost);
+                }
             }
         }
 
         return cost;
     }
 
-    double CollisionChecker::lineCost(const math::Vector2<int> &start, const math::Vector2<int> &end) const
+    double CollisionChecker::lineCost(const Eigen::Vector2i &start, const Eigen::Vector2i &end) const
     {
         double cost = 0.0;
         for (LineIterator line{start, end}; !line.endReached(); line.next())
         {
-            double currentCost = pointCost(line.getCurrent());
-
+            double currentCost = pointCost(line.getX(), line.getY());
             cost = std::max(cost, currentCost);
             if (cost == LETHAL_COST)
             {
@@ -146,10 +200,10 @@ namespace rhoban
         return cost;
     }
 
-    inline double CollisionChecker::pointCost(const math::Vector2<int> &point) const
+    inline double CollisionChecker::pointCost(int x, int y) const
     {
-        int cost = mMap->data[point.y * mMap->info.width + point.x];
-        ROS_INFO("Inspecting point (%d, %d), cost : %d", point.x, point.y, cost);
+        int cost = mMap->data[y * mMap->info.width + x];
+        ROS_INFO("Inspecting point (%d, %d), cost : %d", x, y, cost);
         return cost;
     }
 

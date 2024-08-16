@@ -1,8 +1,9 @@
 #pragma once
 
 #include <cmath>
+#include <Eigen/Dense>
 
-#include "math.h"
+// #include "math.h"
 
 namespace rhoban
 {
@@ -12,60 +13,60 @@ namespace rhoban
     class LineIterator
     {
     private:
-        math::Vector2<int> current;
-        math::Vector2<int> start, end;
+        Eigen::Vector2i current;
+        Eigen::Vector2i start, end;
 
-        int dx, dy; // Difference between x start/end and y respectively
-        int x_inc_uncond, y_inc_uncond;
-        int x_inc_cond, y_inc_cond;
+        Eigen::Vector2i dPos;       // Difference between x start/end and y respectively
+        Eigen::Vector2i inc_uncond;
+        Eigen::Vector2i inc_cond;
+        // int x_inc_uncond, y_inc_uncond;
+        // int x_inc_cond, y_inc_cond;
 
         int error, slope, errorInc;
 
         int current_pixel, num_pixels;
 
     public:
-        LineIterator(const math::Vector2<int> &start_, const math::Vector2<int> &end_)
+        LineIterator(const Eigen::Vector2i &start_, const Eigen::Vector2i &end_)
             : current(start_), start(start_), end(end_), current_pixel(0), error(0), slope(0), errorInc(0)
         {
-            int xtemp = end.x - start.x;
-            int ytemp = end.y - start.y;
+            Eigen::Vector2i tmp = end - start;
+            dPos = tmp.cwiseAbs();
+            inc_uncond = tmp.cwiseSign();
+            inc_cond = inc_uncond;
 
-            dx = abs(xtemp);
-            dy = abs(ytemp);
+            num_pixels = dPos.maxCoeff();
 
-            x_inc_uncond = math::sign(xtemp);
-            y_inc_uncond = math::sign(ytemp);
-
-            x_inc_cond = x_inc_uncond;
-            y_inc_cond = y_inc_uncond;
-
-            // Octant 0-3 (more horizontal than vertical)
-            if (dx >= dy)
-            {
-                x_inc_cond = 0;
-                y_inc_uncond = 0;
-
-                slope = 2 * dy;
-                error = -dx;
-                errorInc = -2 * dx;
-
-                num_pixels = dx;
-            } 
-            // Octant 1-2 (more vertical than horizontal)
-            else
-            {
-                x_inc_uncond = 0;
-                y_inc_cond = 0;
-
-                slope = 2 * dx;
-                error = -dy;
-                errorInc = -2 * dy;
-
-                num_pixels = dy;
-            }
+            reset();
         }
 
         ~LineIterator() {}
+
+        void reset() {
+            current_pixel = 0;
+            current = start;
+            // Octant 0/3 (more vertical than horizontal)
+            if (dPos[0] >= dPos[1])
+            {
+                inc_cond[0] = 0;
+                inc_uncond[1] = 0;
+
+                slope = 2 * dPos[1];
+                error = -dPos[0];
+                errorInc = -2 * dPos[0];
+
+            }
+            // Octant 1/2 (more vertical than horizontal)
+            else
+            {
+                inc_uncond[0] = 0;
+                inc_cond[1] = 0;
+
+                slope = 2 * dPos[0];
+                error = -dPos[1];
+                errorInc = -2 * dPos[1];
+            }
+        }
 
         bool endReached()
         {
@@ -77,26 +78,34 @@ namespace rhoban
             error += slope;
             if (error >= 0)
             {
-                current.x += x_inc_cond;
-                current.y += y_inc_cond;
+                current += inc_cond;
                 error += errorInc;
             }
-            current.x += x_inc_uncond;            
-            current.y += y_inc_uncond;
-            current_pixel++;         
+            current += inc_uncond;
+            current_pixel++;
         }
 
-        math::Vector2<int> getCurrent()
+        int getX()
+        {
+            return current[0];
+        }
+
+        int getY()
+        {
+            return current[1];
+        }
+
+        Eigen::Vector2i getCurrent()
         {
             return current;
         }
 
-        math::Vector2<int> getStart()
+        Eigen::Vector2i getStart()
         {
             return start;
         }
 
-        math::Vector2<int> getEnd()
+        Eigen::Vector2i getEnd()
         {
             return end;
         }

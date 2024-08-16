@@ -3,10 +3,12 @@
 #include <string>
 #include <memory>
 #include <mutex>
+#include <Eigen/Dense>
+
 
 #include "ros/ros.h"
 #include "geometry_msgs/PolygonStamped.h"
-#include "util/math.h"
+// #include "util/math.h"
 
 
 namespace rhoban
@@ -32,7 +34,7 @@ namespace rhoban
             const std::string &topic_name);
 
         Footprint getFootprintRaw();
-        Footprint getFootprintInRobotFrame(math::Vector2<float> position, float theta);
+        Footprint getFootprintInRobotFrame(Eigen::Vector2f position, float theta);
 
     private:
     };
