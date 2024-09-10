@@ -3,3 +3,5 @@ build
 log
 .catkin_workspace
 *.png
+__pycache__
+.ipynb_checkpoints
