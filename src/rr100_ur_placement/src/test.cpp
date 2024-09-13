@@ -2,10 +2,10 @@
 #include <string>
 #include <Eigen/Dense>
 
-#include "rr100_ur_pose_projection/collision_checker.h"
-#include "rr100_ur_pose_projection/footprint_subscriber.h"
-#include "rr100_ur_pose_projection/map_subscriber.h"
-#include "rr100_ur_pose_projection/util/exceptions.h"
+#include "rr100_ur_placement/collision_checker.h"
+#include "rr100_ur_placement/footprint_subscriber.h"
+#include "rr100_ur_placement/map_subscriber.h"
+#include "rr100_ur_placement/util/exceptions.h"
 
 #include "ros/ros.h"
 #include <tf2_ros/transform_listener.h>
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
         rhoban::convert(transform, pose);
         target.header = pose.header;
         target.pose = pose.pose;
-        target.pose.position.x += 1.0;
+        target.pose.position.x += 2.454950f;
         try
         {
             auto ret = col_checker.scorePose(pose.pose, target.pose);

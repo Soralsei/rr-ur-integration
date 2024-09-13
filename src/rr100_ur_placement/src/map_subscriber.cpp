@@ -1,12 +1,12 @@
-#include <iostream>
-#include <iomanip>
+// #include <iostream>
+// #include <iomanip>
 #include <Eigen/Dense>
 
-#include "rr100_ur_pose_projection/map_subscriber.h"
+#include "rr100_ur_placement/map_subscriber.h"
 
 #include "ros/ros.h"
-#include "rr100_ur_pose_projection/util/exceptions.h"
-#include "rr100_ur_pose_projection/util/format.h"
+#include "rr100_ur_placement/util/exceptions.h"
+#include "rr100_ur_placement/util/format.h"
 
 namespace rhoban
 {

@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 
 <launch>
+    <arg name="use_joint_state_publisher" default="false"/>
     <include file="$(find rr100_ur_description)/launch/description.launch"/>
 
-    <node name="joint_state_publisher" type="joint_state_publisher_gui" pkg="joint_state_publisher_gui"/>
+    <node name="joint_state_publisher" type="joint_state_publisher_gui" pkg="joint_state_publisher_gui" if="$(arg use_joint_state_publisher)"/>
     <node name="robot_state_publisher" type="robot_state_publisher" pkg="robot_state_publisher" output='screen'/>
 
     <node name="rviz" type="rviz" pkg="rviz" args="-d $(find rr100_ur_description)/rviz/view_robot.rviz"/>

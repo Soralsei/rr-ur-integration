@@ -85,6 +85,10 @@
         "numericaldiff": "cpp",
         "specialfunctions": "cpp",
         "valarray": "cpp",
-        "dense": "cpp"
-    }
+        "dense": "cpp",
+        "any": "cpp",
+        "codecvt": "cpp",
+        "filesystem": "cpp"
+    },
+    "C_Cpp.autocompleteAddParentheses": false
 }

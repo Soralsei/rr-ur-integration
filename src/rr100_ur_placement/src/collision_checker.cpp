@@ -1,15 +1,15 @@
 #include <algorithm>
 #include <Eigen/Dense>
 
-#include "rr100_ur_pose_projection/collision_checker.h"
-#include "rr100_ur_pose_projection/map_subscriber.h"
-#include "rr100_ur_pose_projection/footprint_subscriber.h"
-#include "rr100_ur_pose_projection/cost_values.h"
-#include "rr100_ur_pose_projection/footprint.h"
+#include "rr100_ur_placement/collision_checker.h"
+#include "rr100_ur_placement/map_subscriber.h"
+#include "rr100_ur_placement/footprint_subscriber.h"
+#include "rr100_ur_placement/cost_values.h"
+#include "rr100_ur_placement/footprint.h"
 
-#include "rr100_ur_pose_projection/util/exceptions.h"
-#include "rr100_ur_pose_projection/util/format.h"
-#include "rr100_ur_pose_projection/util/line_iterator.h"
+#include "rr100_ur_placement/util/exceptions.h"
+#include "rr100_ur_placement/util/format.h"
+#include "rr100_ur_placement/util/line_iterator.h"
 
 #include "tf2/utils.h"
 #include "costmap_2d/cost_values.h"

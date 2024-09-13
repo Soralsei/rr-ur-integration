@@ -5,7 +5,6 @@
 #include <mutex>
 #include <Eigen/Dense>
 
-
 #include "ros/ros.h"
 #include "geometry_msgs/PolygonStamped.h"
 // #include "util/math.h"

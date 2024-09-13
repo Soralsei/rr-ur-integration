@@ -1,21 +1,22 @@
+#include "rr100_ur_placement/footprint.h"
+
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <cstddef>
+#include <cmath>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
-
-#include "rr100_ur_pose_projection/footprint.h"
-// #include "rr100_ur_pose_projection/util/math.h"
 
 namespace rhoban
 {
     Footprint transformFootprint(const Footprint &footprint, Eigen::Vector2f position, float theta)
     {
         Footprint transformed{};
-        float cosTheta = cos(theta);
-        float sinTheta = sin(theta);
+        // float cosTheta = cos(theta);
+        // float sinTheta = sin(theta);
 
-        std::cout << "-------------------------------------------------------------------------------------\n";
+        // std::cout << "-------------------------------------------------------------------------------------\n";
         for (auto &point : footprint)
         {
             Eigen::Vector2f nPoint{point.x, point.y};
@@ -25,10 +26,11 @@ namespace rhoban
             nPoint = r * nPoint;
             nPoint = t * nPoint;
 
-            float newX = position[0] + (point.x * cosTheta - point.y * sinTheta);
-            float newY = position[1] + (point.x * sinTheta + point.y * cosTheta);
+            // float newX = position[0] + (point.x * cosTheta - point.y * sinTheta);
+            // float newY = position[1] + (point.x * sinTheta + point.y * cosTheta);
 
-            std::cout << "Transformed footprint point : (" << nPoint[0] << ", " << nPoint[1] << ")" << std::endl;
+            // std::cout << "Transformed footprint point (manual): (" << newX << ", " << newY << ")" << std::endl;
+            // std::cout << "Transformed footprint point (eigen) : (" << nPoint[0] << ", " << nPoint[1] << ")" << std::endl;
 
             geometry_msgs::Point32 newPoint;
 
@@ -37,7 +39,7 @@ namespace rhoban
 
             transformed.push_back(newPoint);
         }
-        std::cout << "-------------------------------------------------------------------------------------\n";
+        // std::cout << "-------------------------------------------------------------------------------------\n";
 
         return transformed;
     }
@@ -65,7 +67,7 @@ namespace rhoban
 
     bool isInsideFootprint(const Footprint &footprint, Eigen::Vector2f point)
     {
-        size_t count = footprint.size();
+        std::size_t count = footprint.size();
 
         Eigen::Vector2f start{footprint[count - 1].x, footprint[ count - 1].y};
         Eigen::Vector2f end{footprint[0].x, footprint[0].y};
@@ -73,7 +75,7 @@ namespace rhoban
 
         bool sign = std::signbit(normal.dot(point));
 
-        for (size_t i = 1, j = 0; i < count; j = i++)
+        for (std::size_t i = 1, j = 0; i < count; j = i++)
         {
             Eigen::Vector2f start{footprint[j].x, footprint[j].y};
             Eigen::Vector2f end{footprint[i].x, footprint[i].y};

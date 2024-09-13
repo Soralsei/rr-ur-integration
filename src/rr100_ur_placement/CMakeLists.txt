@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.0.2)
-project(rr100_ur_pose_projection)
+cmake_minimum_required(VERSION 3.11)
+project(rr100_ur_placement)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
-add_compile_options(-O0)
-add_compile_options(-ggdb)
+# add_compile_options(-O0)
+# add_compile_options(-ggdb)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -20,7 +20,17 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-find_package(Eigen3)
+find_package(Eigen3 REQUIRED)
+find_package(nlohmann_json)
+
+if(NOT nlohmann_json_FOUND)
+  message("nlohmann_json library not found")
+  include(FetchContent)
+
+  FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+  FetchContent_MakeAvailable(json)
+endif()
+
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -60,11 +70,10 @@ find_package(Eigen3)
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  GetPlacement.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -74,10 +83,10 @@ find_package(Eigen3)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   geometry_msgs#   visualization_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -110,7 +119,7 @@ find_package(Eigen3)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
-#  LIBRARIES rr100_ur_pose_projection
+#  LIBRARIES rr100_ur_placement
  CATKIN_DEPENDS geometry_msgs roscpp rospy visualization_msgs
 #  DEPENDS system_lib
 )
@@ -128,7 +137,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/rr100_ur_pose_projection.cpp
+#   src/${PROJECT_NAME}/rr100_ur_placement.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -162,6 +171,7 @@ add_executable(${PROJECT_NAME}_node
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
   Eigen3::Eigen
+  nlohmann_json::nlohmann_json
 )
 
 #############
@@ -211,7 +221,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_rr100_ur_pose_projection.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_rr100_ur_placement.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
