@@ -7,7 +7,7 @@
 namespace rhoban
 {
     using Layer = std::vector<Eigen::Vector2d>;
-    using LayerPtr = std::unique_ptr<Layer>;
+    using LayerPtr = std::shared_ptr<Layer>;
     class WorkspaceDatabase
     {
     private:
@@ -18,6 +18,8 @@ namespace rhoban
         ~WorkspaceDatabase();
 
         Layer& getLayer(double z);
+        std::vector<LayerPtr>& getAllLayers();
+        std::vector<double>& getAllHeights();
     private:
         void initialize(const std::string json_path);
         std::size_t getClosestZPosition(double z);

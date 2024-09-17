@@ -3,8 +3,8 @@ project(rr100_ur_placement)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
-# add_compile_options(-O0)
-# add_compile_options(-ggdb)
+add_compile_options(-O0)
+add_compile_options(-ggdb)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   tf2_ros
+  tf2_eigen
+  tf2_geometry_msgs
   rr100_ur_description
   visualization_msgs
 )
@@ -120,7 +122,7 @@ generate_messages(
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES rr100_ur_placement
- CATKIN_DEPENDS geometry_msgs roscpp rospy visualization_msgs
+ CATKIN_DEPENDS geometry_msgs roscpp rospy visualization_msgs rr100_ur_description tf2_eigen tf2_ros
 #  DEPENDS system_lib
 )
 
@@ -149,7 +151,9 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node 
-  src/test.cpp 
+  src/robot_base_placer_node.cpp
+  src/robot_base_placer.cpp
+  src/workspace_database.cpp
   src/collision_checker.cpp
   src/footprint_subscriber.cpp
   src/map_subscriber.cpp
@@ -183,10 +187,10 @@ target_link_libraries(${PROJECT_NAME}_node
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# catkin_install_python(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+catkin_install_python(PROGRAMS
+  test/placement_test
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html

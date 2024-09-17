@@ -49,14 +49,19 @@ namespace rhoban
      */
     std::vector<float> getFootprintBounds(const Footprint &footprint)
     {
-        std::vector<float> bounds = std::vector<float>{std::numeric_limits<float>::max(), 0, std::numeric_limits<float>::max(), 0};
+        std::vector<float> bounds = std::vector<float>{
+            std::numeric_limits<float>::max(),
+            std::numeric_limits<float>::lowest(),
+            std::numeric_limits<float>::max(),
+            std::numeric_limits<float>::lowest()};
+            
         for (auto &point : footprint)
         {
             if (point.x <= bounds[0])
                 bounds[0] = point.x;
             if (point.x >= bounds[1])
                 bounds[1] = point.x;
-            if (point.y >= bounds[2])
+            if (point.y <= bounds[2])
                 bounds[2] = point.y;
             if (point.y >= bounds[3])
                 bounds[3] = point.y;
@@ -69,7 +74,7 @@ namespace rhoban
     {
         std::size_t count = footprint.size();
 
-        Eigen::Vector2f start{footprint[count - 1].x, footprint[ count - 1].y};
+        Eigen::Vector2f start{footprint[count - 1].x, footprint[count - 1].y};
         Eigen::Vector2f end{footprint[0].x, footprint[0].y};
         Eigen::Vector2f normal = getNormal(start, end);
 
@@ -82,7 +87,8 @@ namespace rhoban
             Eigen::Vector2f normal = getNormal(start, end);
 
             bool nextSign = std::signbit(normal.dot(point));
-            if (sign != nextSign) {
+            if (sign != nextSign)
+            {
                 return false;
             }
             sign = nextSign;

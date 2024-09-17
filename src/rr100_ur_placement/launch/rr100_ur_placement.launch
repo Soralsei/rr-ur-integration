@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="workspace_config_path"/>
+    
+    <arg name="footprint_topic" default="/footprint"/>
+    <arg name="map_topic" default="/map"/>
+    <arg name="position_weight" default="1.0"/>
+    <arg name="rotation_weight" default="1.0"/>
+
+    <!-- launch-prefix="gdb \-\-args" -->
+    <node name="robot_base_placer" 
+        type="rr100_ur_placement_node" 
+        pkg="rr100_ur_placement" output="screen" >
+        <param name="footprint_topic" value="$(arg footprint_topic)"/>
+        <param name="map_topic" value="$(arg map_topic)"/>
+        <param name="position_weight" value="$(arg position_weight)"/>
+        <param name="rotation_weight" value="$(arg rotation_weight)"/>
+        <param name="workspace_config_path" value="$(arg workspace_config_path)"/>
+    </node>
+</launch>

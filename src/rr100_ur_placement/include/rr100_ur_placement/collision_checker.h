@@ -14,7 +14,7 @@
 namespace rhoban
 {
     using MapPtr = nav_msgs::OccupancyGrid::ConstPtr;
-    using PoseMsg = geometry_msgs::Pose;
+    using PoseMsg = geometry_msgs::PoseStamped;
 
     using Footprint = std::vector<geometry_msgs::Point32>;
 

@@ -22,6 +22,8 @@ namespace rhoban
         initialize(json_path);        
     }
 
+    WorkspaceDatabase::~WorkspaceDatabase(){}
+
     void WorkspaceDatabase::initialize(const std::string json_path) 
     {
         std::ifstream config(json_path);
@@ -30,7 +32,7 @@ namespace rhoban
         {
             try
             {
-                LayerPtr layer = std::make_unique<Layer>();
+                LayerPtr layer = std::make_shared<Layer>();
                 for (auto &point : element.at("points"))
                 {
                     Eigen::Vector2d p(point.at("x"), point.at("y"));
@@ -51,6 +53,16 @@ namespace rhoban
         std::size_t closest_z = getClosestZPosition(z);
         return *layers[closest_z];
 
+    }
+
+    std::vector<LayerPtr>& WorkspaceDatabase::getAllLayers()
+    {
+        return layers;
+    }
+
+    std::vector<double>& WorkspaceDatabase::getAllHeights()
+    {
+        return heights;
     }
 
     std::size_t WorkspaceDatabase::getClosestZPosition(double z)

@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+import rospy
+from rr100_ur_placement.srv import GetPlacementRequest, GetPlacement
+from visualization_msgs.msg import Marker
+
+import tf2_geometry_msgs
+import tf2_ros
+import actionlib
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from geometry_msgs.msg import Pose, PoseStamped
+
+if __name__ == "__main__":
+    rospy.init_node("robot_placement_test")
+    tf_buffer = tf2_ros.Buffer(rospy.Duration(100.0))  # tf buffer length
+    tf_listener = tf2_ros.TransformListener(tf_buffer)
+
+    placement_client = rospy.ServiceProxy('/robot_base_placer/get_placement', GetPlacement)
+    move_base_client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
+    move_base_client.wait_for_server()
+    placement_client.wait_for_service()
+    
+    robot_to_map = tf_buffer.lookup_transform("map", 'base_footprint', rospy.Time.now(), rospy.Duration(10.0))
+    
+    request: GetPlacementRequest = GetPlacementRequest()
+    current = PoseStamped()
+    current.pose.position.x = 0.0
+    current.pose.position.y = 0.0
+    current.pose.position.z = 0.0
+    current.pose.orientation.w = 1.0
+    current.pose.orientation.x = 0.0
+    current.pose.orientation.y = 0.0
+    current.pose.orientation.z = 0.0
+    current = tf2_geometry_msgs.do_transform_pose(current, robot_to_map)
+    
+    target = PoseStamped()
+    target.header.frame_id = "map"
+    target.pose.position.x = 6.996850
+    target.pose.position.y = 6.557320
+    target.pose.position.z = 0.5
+    target.pose.orientation.w = 1.0
+    target.pose.orientation.x = 0.0
+    target.pose.orientation.y = 0.0
+    target.pose.orientation.z = 0.0
+    
+    request.current = current
+    request.target = target
+    
+    ret = placement_client.call(request)
+    
+    goal = MoveBaseGoal()
+    goal.target_pose.header.frame_id = "map"
+    goal.target_pose = ret.best
+    goal.target_pose.header.stamp = rospy.Time.now()
+    rospy.loginfo(f'Publishing goal {goal} to move_base')
+    move_base_client.send_goal_and_wait(goal)
+    ret = move_base_client.get_result()
+    
+    print(ret)
+    
+    # rospy.spin()

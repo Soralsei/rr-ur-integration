@@ -39,11 +39,11 @@ namespace rhoban
             throw e;
         }
 
-        const Eigen::Vector2f currentPosition{currentPose.position.x, currentPose.position.y};
-        const Eigen::Vector2f targetPosition{targetPose.position.x, targetPose.position.y};
+        const Eigen::Vector2f currentPosition{currentPose.pose.position.x, currentPose.pose.position.y};
+        const Eigen::Vector2f targetPosition{targetPose.pose.position.x, targetPose.pose.position.y};
 
-        const float currentTheta = tf2::getYaw(currentPose.orientation);
-        const float targetTheta = tf2::getYaw(targetPose.orientation);
+        const float currentTheta = tf2::getYaw(currentPose.pose.orientation);
+        const float targetTheta = tf2::getYaw(targetPose.pose.orientation);
 
         const Footprint footprint = getFootprintAt(currentPosition, currentTheta, targetPosition, targetTheta);
 
@@ -67,7 +67,7 @@ namespace rhoban
         }
         catch (const std::exception &e)
         {
-            std::cerr << e.what() << '\n';
+            ROS_ERROR("%s", e.what());
         }
         return false;
     }
@@ -87,6 +87,8 @@ namespace rhoban
 
         Eigen::Vector2f coords{x, y};
         Eigen::Vector2f origin{mapOrigin.x, mapOrigin.y};
+
+        // ROS_INFO("Converting coordinates %.2f|%.2f to map coordinates...", x, y);
 
         Eigen::Vector2i cell = ((coords - origin) / resolution).cast<int>();
 
@@ -116,11 +118,11 @@ namespace rhoban
 
         if (cell[0] >= width || cell[0] < 0)
         {
-            throw IllegalPoseException(format("X coordinate %.2f is outside of map grid", x).c_str());
+            throw IllegalPoseException(format("X coordinate %d is outside of map grid", x).c_str());
         }
         if (cell[1] >= height || cell[1] < 0)
         {
-            throw IllegalPoseException(format("Y coordinate %.2f is outside of map grid", y).c_str());
+            throw IllegalPoseException(format("Y coordinate %d is outside of map grid", y).c_str());
         }
 
         return cell;
@@ -137,9 +139,9 @@ namespace rhoban
             {
                 Eigen::Vector2i start = worldToMap(footprint[j].x, footprint[j].y);
                 Eigen::Vector2i end = worldToMap(footprint[i].x, footprint[i].y);
-                ROS_INFO("Inspecting line (%d, %d) -> (%d, %d)", start[0], start[1], end[0], end[1]);
+                // ROS_INFO("Inspecting line (%d, %d) -> (%d, %d)", start[0], start[1], end[0], end[1]);
                 cost = std::max(cost, lineCost(start, end));
-                ROS_INFO("cost : %.2f", cost);
+                // ROS_INFO("cost : %.2f", cost);
             }
             catch (const std::exception &e)
             {
@@ -203,7 +205,7 @@ namespace rhoban
     inline double CollisionChecker::pointCost(int x, int y) const
     {
         int cost = mMap->data[y * mMap->info.width + x];
-        ROS_INFO("Inspecting point (%d, %d), cost : %d", x, y, cost);
+        // ROS_INFO("Inspecting point (%d, %d), cost : %d", x, y, cost);
         return cost;
     }
 

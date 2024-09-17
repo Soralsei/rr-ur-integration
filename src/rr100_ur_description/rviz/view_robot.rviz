@@ -229,23 +229,6 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Class: rviz/TF
-      Enabled: false
-      Filter (blacklist): ""
-      Filter (whitelist): ""
-      Frame Timeout: 15
-      Frames:
-        All Enabled: true
-      Marker Alpha: 1
-      Marker Scale: 1
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: true
-      Tree:
-        {}
-      Update Interval: 0
-      Value: false
     - Alpha: 1
       Class: rviz/Axes
       Enabled: true
@@ -253,7 +236,15 @@ Visualization Manager:
       Name: Axes
       Radius: 0.019999999552965164
       Reference Frame: ur_ee_link
-      Show Trail: true
+      Show Trail: false
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /ur_workspace_points
+      Name: MarkerArray
+      Namespaces:
+        ur_workspace: true
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
@@ -299,9 +290,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3503986597061157
+      Pitch: 0.33039867877960205
       Target Frame: <Fixed Frame>
-      Yaw: 2.5953924655914307
+      Yaw: 1.5753693580627441
     Saved: ~
 Window Geometry:
   Displays:
