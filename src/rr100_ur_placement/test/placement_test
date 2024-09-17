@@ -35,8 +35,8 @@ if __name__ == "__main__":
     
     target = PoseStamped()
     target.header.frame_id = "map"
-    target.pose.position.x = 6.996850
-    target.pose.position.y = 6.557320
+    target.pose.position.x = 3.0
+    target.pose.position.y = 3.0
     target.pose.position.z = 0.5
     target.pose.orientation.w = 1.0
     target.pose.orientation.x = 0.0

@@ -14,6 +14,7 @@
 #include "tf2/utils.h"
 #include "costmap_2d/cost_values.h"
 #include "ros/ros.h"
+#include "visualization_msgs/Marker.h"
 
 namespace rhoban
 {
@@ -24,6 +25,8 @@ namespace rhoban
     {
         mFootprintSubscriber = std::make_unique<FootprintSubscriber>(node, footprint_topic);
         mMapSubscriber = std::make_unique<MapSubscriber>(node, map_topic);
+
+        mCollisionViz = node.advertise<visualization_msgs::Marker>("collision_visualisation", 10);
     }
 
     CollisionChecker::~CollisionChecker() {}
@@ -190,12 +193,37 @@ namespace rhoban
     double CollisionChecker::lineCost(const Eigen::Vector2i &start, const Eigen::Vector2i &end) const
     {
         double cost = 0.0;
+        static uint32_t viz_id = 0;
         for (LineIterator line{start, end}; !line.endReached(); line.next())
         {
-            double currentCost = pointCost(line.getX(), line.getY());
+            int x, y;
+            x = line.getX();
+            y = line.getY();
+            double currentCost = pointCost(x, y);
             cost = std::max(cost, currentCost);
             if (cost == LETHAL_COST)
             {
+                visualization_msgs::Marker marker;
+                geometry_msgs::Pose pose;
+                auto point = mapToWorld(x, y);
+                pose.position.x = point.x();
+                pose.position.y = point.y();
+                marker.header.frame_id = "map";
+                marker.header.stamp = ros::Time();
+                marker.ns = "collision_markers";
+                marker.id = viz_id++;
+                marker.frame_locked = true;
+                marker.type = visualization_msgs::Marker::SPHERE;
+                marker.action = visualization_msgs::Marker::ADD;
+                marker.pose = pose;
+                marker.scale.x = 0.2;
+                marker.scale.y = 0.2;
+                marker.scale.z = 0.2;
+                marker.color.a = 1.0;
+                marker.color.r = 1.0;
+                marker.color.g = 0.0;
+                marker.color.b = 0.0;
+                mCollisionViz.publish(marker);
                 return static_cast<double>(LETHAL_COST);
             }
         }

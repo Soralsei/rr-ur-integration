@@ -137,7 +137,7 @@ namespace rhoban
         marker.header.frame_id = req.target.header.frame_id;
         marker.header.stamp = ros::Time();
         marker.ns = "placement_goal";
-        marker.id = viz_id;
+        marker.id = 0;
         marker.frame_locked = true;
         marker.type = visualization_msgs::Marker::SPHERE;
         marker.action = visualization_msgs::Marker::ADD;
@@ -149,8 +149,9 @@ namespace rhoban
         marker.color.r = 1.0;
         marker.color.g = 0.12;
         marker.color.b = 1.0;
+        marker.lifetime = ros::Duration(60.0);
         placement_viz.publish(marker);
-        viz_id++;
+        // viz_id++;
 
         double yaw_current = tf2::getYaw(current_pose.pose.orientation);
 
@@ -177,10 +178,12 @@ namespace rhoban
                     candidate.pose.orientation.y = q.getY();
                     candidate.pose.orientation.z = q.getZ();
 
-                    ROS_DEBUG_STREAM("Candidate pose : \n"
-                                    << candidate);
-                    bool is_colliding = collision_checker->isCollisionFree(req.current, candidate);
-                    if (!is_colliding)
+                    bool not_colliding = collision_checker->isCollisionFree(req.current, candidate);
+                    ROS_DEBUG_STREAM("Candidate pose : " << T_candidate
+                        << ", theta : " << angle 
+                        << ", is collision free : " << not_colliding);
+
+                    if (not_colliding)
                     {
                         best_score = score;
                         res.best.header.frame_id = "map";
@@ -201,7 +204,7 @@ namespace rhoban
             marker.header.frame_id = "map";
             marker.header.stamp = ros::Time();
             marker.ns = "placement_result";
-            marker.id = viz_id;
+            marker.id = 0;
             marker.frame_locked = true;
             marker.type = visualization_msgs::Marker::ARROW;
             marker.action = visualization_msgs::Marker::ADD;
@@ -213,8 +216,9 @@ namespace rhoban
             marker.color.r = 0.85;
             marker.color.g = 0.85;
             marker.color.b = 0.07;
+            marker.lifetime = ros::Duration(60.0);
             placement_viz.publish(marker);
-            viz_id++;
+            // viz_id++;
         }
         return succeeded;
     }

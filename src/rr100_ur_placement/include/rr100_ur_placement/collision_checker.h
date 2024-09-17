@@ -9,7 +9,6 @@
 #include "geometry_msgs/Pose.h"
 
 #include "ros/ros.h"
-// #include "util/math.h"
 
 namespace rhoban
 {
@@ -27,6 +26,8 @@ namespace rhoban
         Footprint mFootprint;
         std::unique_ptr<FootprintSubscriber> mFootprintSubscriber;
         std::unique_ptr<MapSubscriber> mMapSubscriber;
+
+        ros::Publisher mCollisionViz;
 
         MapPtr mMap;
 
