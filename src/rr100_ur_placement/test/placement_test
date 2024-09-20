@@ -8,17 +8,26 @@ import tf2_geometry_msgs
 import tf2_ros
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from geometry_msgs.msg import Pose, PoseStamped
+from geometry_msgs.msg import PoseStamped
+
+import argparse
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--coords", "-c", nargs=3, type=list[float], required=True, help="The (x y z) coordinates of the target")
+    parser.add_argument("--placement-service", "-p", type=str, default="/robot_base_placer/get_placement", help="The placement service")
+    parser.add_argument("--nav-action", "-n", type=str, default="/move_base", help="The navigation action")\
+    
+    args = parser.parse_args()
+    
     rospy.init_node("robot_placement_test")
     tf_buffer = tf2_ros.Buffer(rospy.Duration(100.0))  # tf buffer length
     tf_listener = tf2_ros.TransformListener(tf_buffer)
 
     placement_client = rospy.ServiceProxy('/robot_base_placer/get_placement', GetPlacement)
     move_base_client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
-    move_base_client.wait_for_server()
     placement_client.wait_for_service()
+    move_base_client.wait_for_server()
     
     robot_to_map = tf_buffer.lookup_transform("map", 'base_footprint', rospy.Time.now(), rospy.Duration(10.0))
     
@@ -35,9 +44,9 @@ if __name__ == "__main__":
     
     target = PoseStamped()
     target.header.frame_id = "map"
-    target.pose.position.x = 3.0
-    target.pose.position.y = 3.0
-    target.pose.position.z = 0.5
+    target.pose.position.x = 5.0
+    target.pose.position.y = 1.5
+    target.pose.position.z = 1.0
     target.pose.orientation.w = 1.0
     target.pose.orientation.x = 0.0
     target.pose.orientation.y = 0.0
@@ -48,6 +57,9 @@ if __name__ == "__main__":
     
     ret = placement_client.call(request)
     
+    print(ret)
+    # input()
+    
     goal = MoveBaseGoal()
     goal.target_pose.header.frame_id = "map"
     goal.target_pose = ret.best
@@ -56,6 +68,5 @@ if __name__ == "__main__":
     move_base_client.send_goal_and_wait(goal)
     ret = move_base_client.get_result()
     
-    print(ret)
     
     # rospy.spin()

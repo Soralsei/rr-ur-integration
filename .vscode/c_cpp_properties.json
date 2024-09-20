@@ -8,9 +8,12 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "~/ros/integration_ws/devel/include/**",
+                "~/ros/ur_ws/devel/include/**",
+                "~/ros/rr100_ws/devel/include/**",
                 "/opt/ros/noetic/include/**",
                 "/opt/openrobots/include/**",
-                "/usr/include/eigen3"
+                "/usr/include/eigen3",
+                "${workspaceFolder}/src/rr100_ur_worker/include"
             ],
             "name": "ROS",
             "intelliSenseMode": "linux-gcc-x64",
