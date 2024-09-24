@@ -2,19 +2,30 @@ cmake_minimum_required(VERSION 3.0.2)
 project(rr100_ur_worker)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
+add_compile_options(-O0)
+add_compile_options(-ggdb)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  message_runtime
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
   actionlib
+  actionlib_msgs
   geometry_msgs
+  control_msgs
+  trajectory_msgs
   move_base_msgs
+  message_generation
   roscpp
   rospy
   rr100_ur_navigation
   rr100_ur_placement
+  ur5_kinematics
 )
 
 ## System dependencies are found with CMake's conventions
@@ -51,11 +62,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  Task.msg
+  TaskArray.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -72,10 +83,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   geometry_msgs#   move_base_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -108,8 +119,23 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
-#  LIBRARIES rr100_ur_worker
-#  CATKIN_DEPENDS actionlib geometry_msgs move_base_msgs roscpp rospy rr100_ur_navigation rr100_ur_placement
+ LIBRARIES rr100_ur_worker
+ CATKIN_DEPENDS 
+  message_runtime
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  actionlib
+  actionlib_msgs
+  geometry_msgs
+  control_msgs
+  trajectory_msgs
+  move_base_msgs
+  roscpp
+  rospy
+  rr100_ur_navigation
+  rr100_ur_placement
+  ur5_kinematics
 #  DEPENDS system_lib
 )
 
@@ -120,14 +146,25 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-include
+  ./include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/rr100_ur_worker.cpp
-# )
+add_library(${PROJECT_NAME}
+  src/robot_controller.cpp
+  src/arm_controller.cpp
+  src/placement_controller.cpp
+  src/Tasks/compound_task.cpp
+  src/Tasks/gripper_task.cpp
+  src/Tasks/placement_task.cpp
+  src/Tasks/reaching_task.cpp
+)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -137,7 +174,9 @@ include
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/_.cpp)
+add_executable(${PROJECT_NAME}_node 
+  src/robot_controller_node.cpp
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -147,12 +186,13 @@ include
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(${PROJECT_NAME}_node
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}
+)
 
 #############
 ## Install ##

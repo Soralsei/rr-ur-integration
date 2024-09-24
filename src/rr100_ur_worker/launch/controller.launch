@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <arg name="task_array_topic" default="/compound_tasks"/>
+    <arg name="ik_action" default="/kinematics_server/goal_pose/"/>
+    <arg name="joint_trajectory_action" default="/scaled_pos_joint_traj_controller/follow_joint_trajectory"/>
+    <arg name="gripper_command_action" default="/gripper_controller/gripper_cmd"/>
+    <arg name="placement_service" default="/robot_base_placer/get_placement"/>
+    <arg name="move_base_action" default="/move_base"/>
+
+    <node launch-prefix="gdb --args" name="robot_controller_node" type="rr100_ur_worker_node" pkg="rr100_ur_worker" output="screen">
+        <param name="task_array_topic" value="$(arg task_array_topic)"/>
+        <param name="ik_action" value="$(arg ik_action)"/>
+        <param name="joint_trajectory_action" value="$(arg joint_trajectory_action)"/>
+        <param name="gripper_command_action" value="$(arg gripper_command_action)"/>
+        <param name="placement_service" value="$(arg placement_service)"/>
+        <param name="move_base_action" value="$(arg move_base_action)"/>
+    </node>
+</launch>

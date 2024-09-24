@@ -5,42 +5,19 @@
 
 namespace rhoban
 {
-    class ReachingTask : Task
+    class ReachingTask : public Task
     {
-    public:
-        enum Action
-        {
-            Goto,
-            Grab,
-            LetGo
-        };
-
+        
     private:
         geometry_msgs::PoseStamped target;
-        Action action;
         double duration;
 
-        ArmController& controller;
+        ArmController &controller;
 
     public:
-        ReachingTask(geometry_msgs::PoseStamped target_, Action action_);
-        ReachingTask(geometry_msgs::PoseStamped target_, double duration_, Action action_);
+        ReachingTask(ArmController &controller_, geometry_msgs::PoseStamped target_, double duration_ = 0.0);
         ~ReachingTask();
         virtual bool execute();
+        geometry_msgs::PoseStamped get_target();
     };
-
-    ReachingTask::ReachingTask(geometry_msgs::PoseStamped target_, Action action_) : ReachingTask(target_, 0.0, action_) {}
-
-    ReachingTask::ReachingTask(geometry_msgs::PoseStamped target_, double duration_, Action action_)
-        : target(target_), duration(duration_), action(action_) {}
-
-    ReachingTask::~ReachingTask() {}
-
-    bool ReachingTask::execute()
-    {
-        // TODO : implement
-        // polling implementation or blocking ?
-        return true;
-    }
-
 } // namespace rhoban
