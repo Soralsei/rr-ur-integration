@@ -9,7 +9,7 @@
     <!--ur5e
     parameters files -->
     <arg name="joint_limit_params" default="$(find ur5e_gripper_description)/config/joint_limits.yaml" />
-    <arg name="kinematics_params"
+    <arg name="kinematics_config"
         default="$(find ur_description)/config/ur5e/default_kinematics.yaml" />
     <arg name="physical_params"
         default="$(find ur_description)/config/ur5e/physical_parameters.yaml" />
@@ -31,7 +31,7 @@
         gps_enabled:=$(arg gps_enabled)
         robot_model:=$(arg robot_model)
         joint_limit_params:=$(arg joint_limit_params)
-        kinematics_params:=$(arg kinematics_params)
+        kinematics_params:=$(arg kinematics_config)
         physical_params:=$(arg physical_params)
         visual_params:=$(arg visual_params)
         transmission_hw_interface:=$(arg transmission_hw_interface)
