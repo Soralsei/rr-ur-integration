@@ -39,7 +39,7 @@
         doc="Port that will be opened by the driver to allow forwarding script commands to the robot." />
     <arg name="kinematics_config"
         doc="Kinematics config file used for calibration correction. This will be used to verify the robot's calibration is matching the robot_description. Pass the same config file that is passed to the robot_description." />
-    <arg name="tf_prefix" default="" doc="tf_prefix used for the robot." />
+    <arg name="prefix" default="ur_" doc="tf_prefix used for the robot." />
     <arg name="controllers"
         default="joint_state_controller scaled_pos_joint_traj_controller force_torque_sensor_controller robot_status_controller" />
     <arg name="stopped_controllers"
