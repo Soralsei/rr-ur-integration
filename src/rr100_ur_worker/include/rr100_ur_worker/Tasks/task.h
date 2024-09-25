@@ -24,6 +24,8 @@ namespace rhoban
         priority_t priority;
         std::string name;
 
+        bool retrying = false;
+
     public:
         Task(const priority_t priority_ = priority::Normal, std::string name_ = "") : priority(priority_), name(name_) {}
         ~Task() {};
@@ -37,6 +39,16 @@ namespace rhoban
         std::string &get_name()
         {
             return name;
+        }
+
+        bool is_retrying()
+        {
+            return retrying;
+        }
+
+        void set_retrying(bool val)
+        {
+            retrying = val;
         }
     };
 } // namespace rhoban

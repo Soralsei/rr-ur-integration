@@ -31,12 +31,15 @@ namespace rhoban
             {
                 std::string name = task->get_name();
                 ROS_WARN("CompoundTask : Failed to execute %s", name.c_str());
-                if (name.compare("ReachingTask") == 0)
+                if (!task->is_retrying() && name.compare("ReachingTask") == 0)
                 {
                     auto reaching_task = std::dynamic_pointer_cast<ReachingTask>(task);
                     auto placement_task = std::make_shared<PlacementTask>(placement_controller, reaching_task->get_target());
+                    
                     ROS_INFO_STREAM("Adding " << placement_task->get_name() << " to front of queue");
                     children.push_front(std::move(placement_task));
+
+                    reaching_task->set_retrying(true);
                 }
                 else
                 {
