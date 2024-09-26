@@ -86,6 +86,7 @@ namespace rhoban
             goal.goal_tolerance = tolerance;
             goal.path_tolerance = tolerance;
             // goal.goal_time_tolerance = ...
+            goal.trajectory.header.stamp = ros::Time::now();
             control_client.sendGoalAndWait(goal);
             auto ret = control_client.getResult();
             if (ret->error_code != control_msgs::FollowJointTrajectoryResult::SUCCESSFUL)
