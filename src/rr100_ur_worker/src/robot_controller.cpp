@@ -45,22 +45,33 @@ namespace rhoban
             return;
 
         auto task = task_queue.front();
-        auto res = task->execute();
+        auto succeeded = task->execute();
 
-        if (!res)
+        if (!succeeded)
         {
             std::string name = task->get_name();
             ROS_WARN("RobotController : Failed to execute %s", name.c_str());
-            if (name.compare("ReachingTask") == 0)
+            if (task->should_retry())
             {
-                std::shared_ptr<ReachingTask> reaching_task = std::dynamic_pointer_cast<ReachingTask>(task);
-                task_queue.insert(task_queue.begin(), std::make_unique<PlacementTask>(*placement_controller, reaching_task->get_target()));
+                task->set_retrying(true);
+                bool is_reaching_task = name.compare("ReachingTask") == 0;
+                if (is_reaching_task)
+                {
+                    std::shared_ptr<ReachingTask> reaching_task = std::dynamic_pointer_cast<ReachingTask>(task);
+                    task_queue.push_front(std::make_unique<PlacementTask>(*placement_controller, reaching_task->get_target()));
+                }
             }
-        } else 
+            else
+            {
+                task->set_retrying(false);
+            }
+        }
+
+        if (succeeded || !task->is_retrying())
         {
-            ROS_INFO("%s successful", task->get_name().c_str());
-            task_queue.erase(task_queue.begin());
-        };
+            ROS_INFO_COND(succeeded, "Task succeeded");
+            task_queue.pop_front();
+        }
     }
 
     void RobotController::taskarray_callback(const rr100_ur_worker::TaskArrayConstPtr &task_array)
@@ -101,6 +112,6 @@ namespace rhoban
                 return;
             }
         }
-        task_queue.push_back(task);
+        add_task(task);
     }
 } // namespace rhoban

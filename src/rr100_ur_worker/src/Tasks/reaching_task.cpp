@@ -5,7 +5,12 @@ namespace rhoban
     ReachingTask::ReachingTask(
         ArmController &controller_,
         geometry_msgs::PoseStamped target_,
-        double duration_) : Task::Task(priority::Normal, "ReachingTask"), controller(controller_), target(target_), duration(duration_) {}
+        double duration_)
+        : Task::Task(priority::Normal, "ReachingTask"),
+        controller(controller_),
+        target(target_), duration(duration_) {
+            retry = true;
+        }
 
     ReachingTask::~ReachingTask() {}
 

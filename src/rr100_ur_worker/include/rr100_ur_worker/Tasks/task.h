@@ -25,9 +25,10 @@ namespace rhoban
         std::string name;
 
         bool retrying = false;
+        bool retry;
 
     public:
-        Task(const priority_t priority_ = priority::Normal, std::string name_ = "") : priority(priority_), name(name_) {}
+        Task(const priority_t priority_ = priority::Normal, std::string name_ = "") : priority(priority_), name(name_), retry(false) {}
         ~Task() {};
         virtual bool execute() = 0;
 
@@ -49,6 +50,11 @@ namespace rhoban
         void set_retrying(bool val)
         {
             retrying = val;
+        }
+
+        bool should_retry(void)
+        {
+            return retry && !retrying;
         }
     };
 } // namespace rhoban

@@ -14,7 +14,9 @@ namespace rhoban
         PlacementController &placement_controller_,
         priority_t priority_,
         size_t size)
-        : Task::Task(priority_, "CompoundTask"), arm_controller(arm_controller_), placement_controller(placement_controller_) {}
+        : Task::Task(priority_, "CompoundTask"),
+          arm_controller(arm_controller_),
+          placement_controller(placement_controller_) {}
 
     CompoundTask::~CompoundTask()
     {
@@ -25,28 +27,32 @@ namespace rhoban
     {
         while (!children.empty())
         {
+            // ROS_INFO_THROTTLE(1, "Looping...");
             auto task = children.front();
-            auto res = task->execute();
-            if (!res)
+            auto succeeded = task->execute();
+            if (!succeeded)
             {
                 std::string name = task->get_name();
                 ROS_WARN("CompoundTask : Failed to execute %s", name.c_str());
-                if (!task->is_retrying() && name.compare("ReachingTask") == 0)
+                if (task->should_retry())
                 {
-                    auto reaching_task = std::dynamic_pointer_cast<ReachingTask>(task);
-                    auto placement_task = std::make_shared<PlacementTask>(placement_controller, reaching_task->get_target());
-                    
-                    ROS_INFO_STREAM("Adding " << placement_task->get_name() << " to front of queue");
-                    children.push_front(std::move(placement_task));
+                    task->set_retrying(true);
+                    bool is_reaching_task = name.compare("ReachingTask") == 0;
+                    if (is_reaching_task)
+                    {
+                        auto reaching_task = std::dynamic_pointer_cast<ReachingTask>(task);
+                        auto placement_task = std::make_shared<PlacementTask>(placement_controller, reaching_task->get_target());
 
-                    reaching_task->set_retrying(true);
+                        ROS_INFO_STREAM("Adding " << placement_task->get_name() << " to front of queue");
+                        children.push_front(std::move(placement_task));
+                    }
                 }
                 else
                 {
                     return false;
                 }
             }
-            else
+            if (succeeded || !task->is_retrying())
             {
                 children.pop_front();
             }
