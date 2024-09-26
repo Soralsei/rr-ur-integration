@@ -5,8 +5,9 @@ namespace rhoban
     PlacementController::PlacementController(
         ros::NodeHandle nh_,
         const std::string &placement_service,
-        const std::string &move_base_action)
-        : nh(nh_), move_base_client(move_base_action, true)
+        const std::string &move_base_action,
+        tf2_ros::Buffer &tf_)
+        : nh(nh_), move_base_client(move_base_action, true), tf(tf_)
     {
         placement_client = nh.serviceClient<rr100_ur_placement::GetPlacement>(placement_service);
         bool connected = placement_client.waitForExistence(ros::Duration(10.0));
@@ -21,8 +22,6 @@ namespace rhoban
             throw std::runtime_error("Failed to connect to move_base action");
         }
         ROS_INFO("Connected to move_base action");
-        tf = std::make_unique<tf2_ros::Buffer>(ros::Duration(100.0));
-        tf_listener = std::make_unique<tf2_ros::TransformListener>(*tf);
     }
 
     PlacementController::~PlacementController() {}
@@ -53,8 +52,8 @@ namespace rhoban
         geometry_msgs::TransformStamped base_to_map, target_to_map;
         try
         {
-            base_to_map = tf->lookupTransform("map", "base_footprint", ros::Time(0));
-            target_to_map = tf->lookupTransform("map", pose.header.frame_id, ros::Time(0));
+            base_to_map = tf.lookupTransform("map", "base_footprint", ros::Time(0));
+            target_to_map = tf.lookupTransform("map", pose.header.frame_id, ros::Time(0));
         }
         catch (const std::exception &e)
         {

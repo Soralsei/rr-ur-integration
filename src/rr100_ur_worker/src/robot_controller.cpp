@@ -13,12 +13,15 @@ namespace rhoban
         update_timer = nh.createTimer(ros::Duration(0.1), &RobotController::update, this);
         task_sub = nh.subscribe(task_array_topic, 10, &RobotController::taskarray_callback, this);
 
+        tf = std::make_unique<tf2_ros::Buffer>(ros::Duration(100.0));
+        tf_listener = std::make_unique<tf2_ros::TransformListener>(*tf);
+
         try
         {
             ROS_INFO("Instantiating robot arm controller...");
             arm_controller = std::make_unique<ArmController>(ik_action, joint_trajectory_action, gripper_command_action);
             ROS_INFO("Instantiating robot placement controller...");
-            placement_controller = std::make_unique<PlacementController>(nh, placement_service, move_base_action);
+            placement_controller = std::make_unique<PlacementController>(nh, placement_service, move_base_action, *tf);
         }
         catch (const std::exception &e)
         {
@@ -84,8 +87,9 @@ namespace rhoban
             switch (task_msg.type)
             {
             case rr100_ur_worker::TaskArray::TYPE_REACHING:
-                task->add_reaching(*arm_controller, task_msg.target, task_msg.duration);
+                task->add_reaching(*arm_controller, task_msg.target, *tf, task_msg.duration);
                 break;
+
             case rr100_ur_worker::TaskArray::TYPE_GRIPPER:
                 GripperTask::Action action;
                 switch (task_msg.action)
@@ -93,10 +97,11 @@ namespace rhoban
                 case rr100_ur_worker::Task::ACTION_GRIP:
                     action = GripperTask::Action::Grip;
                     break;
+
                 case rr100_ur_worker::Task::ACTION_RELEASE:
                     action = GripperTask::Action::Release;
-
                     break;
+
                 case rr100_ur_worker::Task::ACTION_SET:
                 default:
                     action = GripperTask::Action::Set;
@@ -104,9 +109,11 @@ namespace rhoban
                 }
                 task->add_gripper(*arm_controller, action, task_msg.gripper_position);
                 break;
+
             case rr100_ur_worker::TaskArray::TYPE_PLACEMENT:
                 task->add_placement(*placement_controller, task_msg.target);
                 break;
+
             default:
                 ROS_ERROR("RobotController : unknown task type %d", task_msg.type);
                 return;

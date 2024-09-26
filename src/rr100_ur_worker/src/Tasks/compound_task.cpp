@@ -63,9 +63,22 @@ namespace rhoban
     CompoundTask &CompoundTask::add_reaching(
         ArmController &controller,
         geometry_msgs::PoseStamped target,
+        tf2_ros::Buffer &tf,
         double duration)
     {
-        return add(std::make_shared<ReachingTask>(controller, target, duration));
+        geometry_msgs::PoseStamped transformed_target;
+        geometry_msgs::TransformStamped target_to_map;
+        try
+        {
+            target_to_map = tf.lookupTransform("map", target.header.frame_id, ros::Time(0));
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        tf2::doTransform(target, transformed_target, target_to_map);
+        
+        return add(std::make_shared<ReachingTask>(controller, transformed_target, duration));
     }
 
     CompoundTask &CompoundTask::add_placement(

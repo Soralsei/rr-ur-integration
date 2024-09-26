@@ -8,6 +8,7 @@
 #include "rr100_ur_worker/placement_controller.h"
 
 // #include <queue>
+#include "tf2_ros/buffer.h"
 #include <vector>
 #include <memory>
 
@@ -29,7 +30,7 @@ namespace rhoban
         virtual bool execute() override;
 
         CompoundTask &add(TaskPtr task);
-        CompoundTask &add_reaching(ArmController &controller_, geometry_msgs::PoseStamped target_, double duration_ = 0.0);
+        CompoundTask &add_reaching(ArmController &controller_, geometry_msgs::PoseStamped target_, tf2_ros::Buffer &tf, double duration_ = 0.0);
         CompoundTask &add_placement(PlacementController &controller_, geometry_msgs::PoseStamped target_);
         CompoundTask &add_gripper(ArmController &controller_, GripperTask::Action action_, double position = 0.0);
     };

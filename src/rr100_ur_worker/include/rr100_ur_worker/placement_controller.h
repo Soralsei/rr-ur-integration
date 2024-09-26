@@ -25,14 +25,14 @@ namespace rhoban
 
         ros::ServiceClient placement_client;
         ControllerClient move_base_client;
-        std::unique_ptr<tf2_ros::Buffer> tf;
-        std::unique_ptr<tf2_ros::TransformListener> tf_listener;
+        tf2_ros::Buffer &tf;
 
     public:
         PlacementController(
             ros::NodeHandle nh_,
             const std::string &placement_service,
-            const std::string &move_base_action);
+            const std::string &move_base_action,
+            tf2_ros::Buffer &tf_);
         ~PlacementController();
 
     protected:

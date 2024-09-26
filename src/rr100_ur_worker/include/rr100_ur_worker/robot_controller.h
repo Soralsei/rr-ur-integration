@@ -7,6 +7,7 @@
 #include "rr100_ur_worker/Tasks/task.h"
 #include "rr100_ur_worker/Tasks/compound_task.h"
 #include "rr100_ur_worker/TaskArray.h"
+#include "tf2_ros/buffer.h"
 #include <mutex>
 
 namespace rhoban
@@ -18,6 +19,9 @@ namespace rhoban
 
         std::unique_ptr<ArmController> arm_controller;
         std::unique_ptr<PlacementController> placement_controller;
+
+        std::unique_ptr<tf2_ros::Buffer> tf;
+        std::unique_ptr<tf2_ros::TransformListener> tf_listener;
 
         std::list<TaskPtr> task_queue;
         std::mutex task_queue_mutex;
