@@ -208,6 +208,7 @@ namespace rhoban
                 auto point = mapToWorld(x, y);
                 pose.position.x = point.x();
                 pose.position.y = point.y();
+                pose.orientation.w = 1.0;
                 marker.header.frame_id = "map";
                 marker.header.stamp = ros::Time();
                 marker.ns = "collision_markers";
