@@ -64,7 +64,7 @@
     <arg name="use_spline_interpolation" default="true"
         doc="True if splines should be used as interpolation on the robot controller when forwarding trajectory, if false movej or movel commands are used" />
 
-    <node name="robot_state_publisher" type="robot_state_publisher" pkg="robot_state_publisher" />
+    <node name="robot_state_publisher" type="robot_state_publisher" pkg="robot_state_publisher"  respawn="true" />
     
     <!-- Load hardware interface -->
     <node name="ur_hardware_interface" pkg="ur_robot_driver" type="ur_robot_driver_node"

@@ -62,6 +62,11 @@
 			"source": "${localEnv:HOME}/.gazebo",
 			"target": "/root/.gazebo/",
 			"type": "bind"
+		},
+		{
+			"source": "/dev/",
+			"target": "/dev/",
+			"type": "bind"
 		}
 	]
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.

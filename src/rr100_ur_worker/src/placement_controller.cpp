@@ -50,10 +50,11 @@ namespace rhoban
 
     bool PlacementController::go_to(const geometry_msgs::PoseStamped &pose)
     {
-        geometry_msgs::TransformStamped transform;
+        geometry_msgs::TransformStamped base_to_map, target_to_map;
         try
         {
-            transform = tf->lookupTransform("map", "base_footprint", ros::Time(0));
+            base_to_map = tf->lookupTransform("map", "base_footprint", ros::Time(0));
+            target_to_map = tf->lookupTransform("map", pose.header.frame_id, ros::Time(0));
         }
         catch (const std::exception &e)
         {
@@ -61,12 +62,13 @@ namespace rhoban
             return false;
         }
         // 0 initialized
-        geometry_msgs::PoseStamped identity, current;
+        geometry_msgs::PoseStamped identity, current, target;
         // Identity quaternion
         identity.pose.orientation.w = 1.0;
-        tf2::doTransform(identity, current, transform);
+        tf2::doTransform(identity, current, base_to_map);
+        tf2::doTransform(pose, target, target_to_map);
 
-        auto placement = get_placement(current, pose);
+        auto placement = get_placement(current, target);
         if (placement.has_value())
         {
             auto P = placement.value();
