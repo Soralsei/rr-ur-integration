@@ -29,12 +29,12 @@ namespace rhoban
         }
         ROS_INFO("Connected to Joint Trajectory controller action server");
 
-        connected = gripper_client.waitForServer(ros::Duration(connection_timeout));
-        if (!connected)
-        {
-            throw std::runtime_error("Failed to connect to Gripper controller action server, make sure it is running");
-        }
-        ROS_INFO("Connected to Gripper controller action server");
+        // connected = gripper_client.waitForServer(ros::Duration(connection_timeout));
+        // if (!connected)
+        // {
+        //     throw std::runtime_error("Failed to connect to Gripper controller action server, make sure it is running");
+        // }
+        // ROS_INFO("Connected to Gripper controller action server");
     }
 
     ArmController::~ArmController() {}
