@@ -37,7 +37,8 @@ namespace rhoban
             std::swap(d_start, d_end);
         }
 
-        double step = (d_end - d_start) / d_num - 1;
+        double step = (d_end - d_start) / (d_num - 1);
+
         for (size_t i = 0; i < num - 1; i++)
         {
             space.push_back(d_start + step * i);
@@ -166,7 +167,7 @@ namespace rhoban
             for (auto &&point : layer)
             {
                 Eigen::Vector2d T_candidate = T_target - (r_candidate * point);
-                double score = scorePose(T_current, T_candidate, yaw_current, r_candidate.angle());
+                double score = scorePose(T_current, T_candidate, yaw_current, angle);
                 if (std::isnan(best_score) || score < best_score)
                 {
                     tf2::Quaternion q{tf2::Vector3{0.0, 0.0, 1.0}, angle};
@@ -229,7 +230,10 @@ namespace rhoban
         const double yaw_current,
         const double yaw_candidate)
     {
-        return position_weight * (t_candidate - t_current).norm() + rotation_weight * (yaw_candidate - yaw_current);
+        double position_score = position_weight * (t_candidate - t_current).norm();
+        double orientation_score = rotation_weight * std::abs(yaw_candidate - yaw_current);
+        ROS_INFO("Position score : %.4f | Orientation score : %.4f", position_score, orientation_score);
+        return position_score + orientation_score; 
     }
 
 } // namespace rhoban
