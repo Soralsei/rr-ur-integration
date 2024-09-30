@@ -1,6 +1,6 @@
 if [[ $# -eq 0 ]]; then
     echo "You must pass the IP address of the network interface connected to the RR100"
-    exit 1
+    return
 fi
 
 export ROS_MASTER_URI=http://rr-100-07:11311

@@ -8,12 +8,12 @@
     <xacro:property name="ground_clearance" value="0.11" />
 
     <!-- Mounting plate properties (in meters)-->
-    <xacro:property name="plate_rear_distance" value="0.05"/>
+    <xacro:property name="plate_rear_distance" value="0.05" />
     <xacro:property name="plate_width" value="0.25" />
     <xacro:property name="plate_height" value="0.2" />
     <!-- Actual value -->
-    <xacro:property name="plate_thickness" value="0.01" /> 
-     <!-- Elevated value -->
+    <xacro:property name="plate_thickness" value="0.01" />
+    <!-- Elevated value -->
     <!-- <xacro:property name="plate_thickness" value="0.40" />  -->
 
     <xacro:property name="rail_size" value="0.025" />
@@ -34,7 +34,7 @@
     <xacro:arg name="safety_pos_margin" default="0.15" />
     <xacro:arg name="safety_k_position" default="20" />
 
-    <xacro:arg name="ur_prefix" default="ur_"/>
+    <xacro:arg name="ur_prefix" default="ur_" />
 
     <xacro:include filename="$(find rr100_description)/urdf/rr100.urdf.xacro" />
     <xacro:include filename="$(find ur5e_gripper_description)/urdf/ur_hand_e.xacro" />
@@ -47,7 +47,8 @@
                 <mesh filename="package://rr100_ur_description/meshes/ur5_mounting_plate.stl"
                     scale="0.001 0.001 0.001" />
                 <!-- Elevated -->
-                <!-- <mesh filename="package://rr100_ur_description/meshes/ur5_mounting_plate_shifted.stl"
+                <!-- <mesh
+                filename="package://rr100_ur_description/meshes/ur5_mounting_plate_shifted.stl"
                     scale="0.001 0.001 0.04" /> -->
             </geometry>
             <material name="grey" />
@@ -70,7 +71,17 @@
         <parent link="base_link" />
         <child link="mounting_base_link" />
     </joint>
-    <gazebo reference="mounting_base_link"/>
+
+    <link name="aruco_marker_link" />
+    <joint name="aruco_marker_joint" type="fixed">
+        <origin
+            xyz="0 0 0.0807"
+            rpy="0 0 0" />
+        <parent link="rslidar_base_link" />
+        <child link="aruco_marker_link" />
+    </joint>
+
+    <gazebo reference="mounting_base_link" />
 
     <xacro:ur5_hand_e
         prefix="$(arg ur_prefix)"
@@ -82,12 +93,12 @@
         safety_limits="$(arg safety_limits)"
         safety_pos_margin="$(arg safety_pos_margin)"
         safety_k_position="$(arg safety_k_position)" />
-    
+
     <joint name="ur_base_joint" type="fixed">
         <origin
             xyz="0 0 ${plate_thickness / 2}"
             rpy="0 0 0" />
-        <parent link="mounting_base_link"/>
-        <child link="$(arg ur_prefix)base_link"/>
+        <parent link="mounting_base_link" />
+        <child link="$(arg ur_prefix)base_link" />
     </joint>
 </robot>

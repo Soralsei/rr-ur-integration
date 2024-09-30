@@ -7,7 +7,7 @@
     <arg name="placement_service" default="/robot_base_placer/get_placement"/>
     <arg name="move_base_action" default="/move_base"/>
 
-    <node launch-prefix="gdb --args" name="robot_controller_node" type="rr100_ur_worker_node" pkg="rr100_ur_worker" output="screen">
+    <node name="robot_controller_node" type="rr100_ur_worker_node" pkg="rr100_ur_worker" output="screen">
         <param name="task_array_topic" value="$(arg task_array_topic)"/>
         <param name="ik_action" value="$(arg ik_action)"/>
         <param name="joint_trajectory_action" value="$(arg joint_trajectory_action)"/>
