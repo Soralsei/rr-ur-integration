@@ -85,7 +85,8 @@
     <arg name="robot_model" value="ur5e" />
 
     <include file="$(find rr100_ur_description)/launch/description.launch" pass_all_args="true" />
-    <node name="robot_state_publisher" type="robot_state_publisher" pkg="robot_state_publisher" respawn="true" />
+    <node name="robot_state_publisher" type="robot_state_publisher" pkg="robot_state_publisher"
+        respawn="true" />
 
     <include file="$(find rr100_ur_bringup)/launch/ur5e_bringup.launch" pass_all_args="true" ns="ur" />
 </launch>
