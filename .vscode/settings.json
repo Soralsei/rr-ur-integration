@@ -90,5 +90,7 @@
         "codecvt": "cpp",
         "filesystem": "cpp"
     },
-    "C_Cpp.autocompleteAddParentheses": false
+    "C_Cpp.autocompleteAddParentheses": false,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "off"
 }
