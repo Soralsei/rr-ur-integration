@@ -64,10 +64,12 @@ class ArucoLocalizer:
             
             base_frame_to_marker : TransformStamped = None
             try:
-                base_frame_to_marker = self.tf.lookup_transform(self.robot_marker_frame, self.robot_base_frame, time=rospy.Time.from_sec(0))
+                base_frame_to_marker = self.tf.lookup_transform(self.robot_base_frame, self.robot_marker_frame, time=rospy.Time.from_sec(0))
             except Exception as e:
                 rospy.logerr(f'Failed to lookup transform : {e.with_traceback(None)}')
                 return
+            
+            # print(base_frame_to_marker)
             
             self.marker_transforms.clear()
             base_frame_to_marker = numpify(base_frame_to_marker.transform)
@@ -76,7 +78,7 @@ class ArucoLocalizer:
                 cam_to_target = numpify(marker.pose.pose)
                 robot_marker_to_cam = np.linalg.inv(numpify(self.robot_marker.pose.pose))
                 base_frame_to_cam = base_frame_to_marker @ robot_marker_to_cam
-                base_frame_to_target = (base_frame_to_cam @ cam_to_target) * -1
+                base_frame_to_target = (base_frame_to_cam @ cam_to_target)
 
                 base_to_target_transform = msgify(Transform, base_frame_to_target)
                 self.marker_transforms[marker.id] = base_to_target_transform

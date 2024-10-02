@@ -74,6 +74,8 @@ namespace rhoban
                         .add(reaching_task);
                     task_queue.pop_front();
                     task_queue.push_front(new_task);
+
+                    return;
                 }
             }
         }
@@ -134,6 +136,8 @@ namespace rhoban
         geometry_msgs::TransformStamped target_to_map;
         geometry_msgs::PoseStamped transformed_target;
 
+        ROS_INFO_STREAM("Got task : " << task_msg);
+
         switch (task_msg->type)
         {
         case rr100_ur_worker::TaskArray::TYPE_REACHING:
@@ -143,11 +147,11 @@ namespace rhoban
             }
             catch (const std::exception &e)
             {
-                std::cerr << e.what() << '\n';
+                ROS_ERROR_STREAM("RobotController : " << e.what());
                 return;
             }
             tf2::doTransform(task_msg->target, transformed_target, target_to_map);
-            task = std::make_shared<ReachingTask>(*arm_controller, transformed_target, task_msg->duration);
+            task = std::make_shared<ReachingTask>(*arm_controller, transformed_target, task_msg->duration, task_msg->num_retries);
             break;
 
         case rr100_ur_worker::TaskArray::TYPE_GRIPPER:
@@ -167,11 +171,11 @@ namespace rhoban
                 action = GripperTask::Action::Set;
                 break;
             }
-            task = std::make_shared<GripperTask>(*arm_controller, action, task_msg->gripper_position);
+            task = std::make_shared<GripperTask>(*arm_controller, action, task_msg->gripper_position, task_msg->num_retries);
             break;
 
         case rr100_ur_worker::TaskArray::TYPE_PLACEMENT:
-            task = std::make_shared<PlacementTask>(*placement_controller, task_msg->target);
+            task = std::make_shared<PlacementTask>(*placement_controller, task_msg->target, task_msg->num_retries);
             break;
 
         default:

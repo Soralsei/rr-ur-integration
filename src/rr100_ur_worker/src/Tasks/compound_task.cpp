@@ -30,20 +30,25 @@ namespace rhoban
             // ROS_INFO_THROTTLE(1, "Looping...");
             auto task = children.front();
             auto succeeded = task->execute();
+            std::string name = task->get_name();
             if (!succeeded)
             {
-                std::string name = task->get_name();
                 ROS_WARN("CompoundTask : Failed to execute %s", name.c_str());
                 if (task->should_retry())
                 {
                     ROS_INFO("Task should be retried, retrying...");
+                    task->retry();
                 }
                 else
                 {
                     return false;
                 }
             }
-            children.pop_front();
+            else
+            {
+                ROS_INFO_STREAM("CompoundTask : Child " << name << " successful");
+                children.pop_front();
+            }
         }
         return true;
     }
@@ -55,7 +60,7 @@ namespace rhoban
         int num_retries,
         double duration)
     {
-        
+
         return add(std::make_shared<ReachingTask>(controller, target, duration, num_retries));
     }
 

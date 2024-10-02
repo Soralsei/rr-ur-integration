@@ -3,7 +3,8 @@
 import rospy
 from rr100_ur_vision.srv import GetMarkerTransform, GetMarkerTransformRequest
 from rr100_ur_worker.msg import Task
-from geometry_msgs.msg import PoseStamped, TransformStamped
+from geometry_msgs.msg import PoseStamped, Transform
+from ros_numpy import numpify, msgify
 import tf2_geometry_msgs as tf
 import argparse
 
@@ -18,7 +19,7 @@ if __name__ == '__main__':
     aruco_client = rospy.ServiceProxy("/aruco_localizer/get_marker_transform", GetMarkerTransform)
     aruco_client.wait_for_service(rospy.Duration(2.0))
     
-    freq = rospy.Rate(rospy.Duration(1.0))
+    freq = rospy.Rate(1.0)
     
     done = False
     
@@ -33,7 +34,8 @@ if __name__ == '__main__':
             freq.sleep()
             continue
         answer = ""
-        while answer != 'y' or answer != 'n':
+        
+        while answer != 'y' and answer != 'n':
             answer = input(f'Got transform {res.transform}, proceed [y/n] : ').lower()
             
         if answer == 'n':
@@ -43,21 +45,28 @@ if __name__ == '__main__':
         task = Task()
         task.type = Task.TYPE_REACHING
         
+        T = Transform()
+        T.rotation.x = 1.0
+        T.rotation.y = 0.0
+        T.rotation.z = 0.0
+        T.rotation.w = 0.0
+        transform = numpify(res.transform)
+        rot = numpify(T)
+        transform = transform @ rot
+        transform = msgify(Transform, transform)
+        
         pose = PoseStamped()
+        
+        pose.pose.position = transform.translation
+        pose.pose.orientation = transform.rotation
+        
         pose.header.frame_id = "base_footprint"
         pose.header.stamp = rospy.Time.now()
         
-        pose.pose.position = res.transform.translation
-        pose.pose.orientation = res.transform.orientation
-        
-        T = TransformStamped()
-        T.transform.rotation.x = 1.0
-        T.transform.rotation.y = 0.0
-        T.transform.rotation.z = 0.0
-        T.transform.rotation.w = 0.0
-        pose = tf.do_transform_pose(pose, transform=T)
+        print(pose)
         
         task.target = pose
+        task.num_retries = 1
         
         rospy.loginfo(f'Publishing Task...')
         task_pub.publish(task)
