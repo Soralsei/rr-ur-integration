@@ -4,7 +4,11 @@ namespace rhoban
 {
     PlacementTask::PlacementTask(
         PlacementController &controller_,
-        geometry_msgs::PoseStamped target_) : Task::Task(priority::Normal, "PlacementTask"), controller(controller_), target(target_) {}
+        geometry_msgs::PoseStamped target_,
+        int num_retries_)
+        : Task::Task(priority::Normal, "PlacementTask", num_retries_),
+          controller(controller_),
+          target(target_) {}
 
     PlacementTask::~PlacementTask() {}
 

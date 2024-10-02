@@ -26,6 +26,7 @@ namespace rhoban
         std::list<TaskPtr> task_queue;
         std::mutex task_queue_mutex;
 
+        ros::Subscriber compound_task_sub;
         ros::Subscriber task_sub;
 
         ros::Timer update_timer;
@@ -38,5 +39,6 @@ namespace rhoban
         void add_task(TaskPtr task);
         void update(const ros::TimerEvent &);
         void taskarray_callback(const rr100_ur_worker::TaskArrayConstPtr &task_array);
+        void task_callback(const rr100_ur_worker::TaskConstPtr &task_array);
     };
 } // namespace rhoban

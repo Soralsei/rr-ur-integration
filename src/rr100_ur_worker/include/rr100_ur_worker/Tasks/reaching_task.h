@@ -15,7 +15,7 @@ namespace rhoban
         ArmController &controller;
 
     public:
-        ReachingTask(ArmController &controller_, geometry_msgs::PoseStamped target_, double duration_ = 0.0);
+        ReachingTask(ArmController &controller_, geometry_msgs::PoseStamped target_, double duration_ = 0.0, int num_retries = 0);
         ~ReachingTask();
         virtual bool execute();
         geometry_msgs::PoseStamped get_target();

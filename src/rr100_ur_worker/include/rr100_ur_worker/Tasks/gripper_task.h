@@ -17,7 +17,7 @@ namespace rhoban
         };
 
     private:
-        double value;
+        double position;
 
         geometry_msgs::PoseStamped target;
         Action action;
@@ -25,7 +25,7 @@ namespace rhoban
         ArmController &controller;
 
     public:
-        GripperTask(ArmController &controller_, Action action_, double value_ = 0.0);
+        GripperTask(ArmController &controller_, Action action_, double position_ = 0.0, int num_retries_ = 0);
         ~GripperTask();
         virtual bool execute();
     };

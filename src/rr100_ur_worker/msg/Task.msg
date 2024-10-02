@@ -9,6 +9,7 @@ uint8 ACTION_SET = 2
 # Message definition
 # Task type
 uint8 type
+uint8 num_retries
 
 # Target pose (ReachingTask, PlacementTask)
 geometry_msgs/PoseStamped target

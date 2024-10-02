@@ -30,8 +30,23 @@ namespace rhoban
         virtual bool execute() override;
 
         CompoundTask &add(TaskPtr task);
-        CompoundTask &add_reaching(ArmController &controller_, geometry_msgs::PoseStamped target_, tf2_ros::Buffer &tf, double duration_ = 0.0);
-        CompoundTask &add_placement(PlacementController &controller_, geometry_msgs::PoseStamped target_);
-        CompoundTask &add_gripper(ArmController &controller_, GripperTask::Action action_, double position = 0.0);
+
+        CompoundTask &add_reaching(
+            ArmController &controller_,
+            geometry_msgs::PoseStamped target_,
+            tf2_ros::Buffer &tf,
+            int num_retries,
+            double duration_ = 0.0);
+
+        CompoundTask &add_placement(
+            PlacementController &controller_,
+            geometry_msgs::PoseStamped target_,
+            int num_retries);
+
+        CompoundTask &add_gripper(
+            ArmController &controller_,
+            GripperTask::Action action_,
+            int num_retries,
+            double position = 0.0);
     };
 } // namespace rhoban

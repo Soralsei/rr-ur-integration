@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <cstdint>
 #include <cstddef>
@@ -24,12 +25,19 @@ namespace rhoban
         priority_t priority;
         std::string name;
 
-        bool retrying = false;
-        bool retry;
+        // bool retrying = false;
+        // bool retry;
+
+        int num_retries = 0;
 
     public:
-        Task(const priority_t priority_ = priority::Normal, std::string name_ = "") : priority(priority_), name(name_), retry(false) {}
+        Task(const priority_t priority_ = priority::Normal,
+             std::string name_ = "",
+             int num_retries_ = 0)
+            : priority(priority_), name(name_), num_retries(num_retries_) /*, retry(false) */ {}
+
         ~Task() {};
+
         virtual bool execute() = 0;
 
         friend bool operator<(const Task &lhs, const Task &rhs)
@@ -42,19 +50,31 @@ namespace rhoban
             return name;
         }
 
-        bool is_retrying()
-        {
-            return retrying;
-        }
+        // bool is_retrying()
+        // {
+        //     return retrying;
+        // }
 
-        void set_retrying(bool val)
-        {
-            retrying = val;
-        }
+        // void set_retrying(bool val)
+        // {
+        //     retrying = val;
+        // }
 
         bool should_retry(void)
         {
-            return retry && !retrying;
+            return num_retries > 0;
+        }
+
+        void retry(void)
+        {
+            if (num_retries > 0 )
+            {
+                num_retries--;
+            }
+            else 
+            {
+                std::cerr << "Error : trying to retry Task with no retries left";
+            }
         }
     };
 } // namespace rhoban

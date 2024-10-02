@@ -36,26 +36,14 @@ namespace rhoban
                 ROS_WARN("CompoundTask : Failed to execute %s", name.c_str());
                 if (task->should_retry())
                 {
-                    task->set_retrying(true);
-                    bool is_reaching_task = name.compare("ReachingTask") == 0;
-                    if (is_reaching_task)
-                    {
-                        auto reaching_task = std::dynamic_pointer_cast<ReachingTask>(task);
-                        auto placement_task = std::make_shared<PlacementTask>(placement_controller, reaching_task->get_target());
-
-                        ROS_INFO_STREAM("Adding " << placement_task->get_name() << " to front of queue");
-                        children.push_front(std::move(placement_task));
-                    }
+                    ROS_INFO("Task should be retried, retrying...");
                 }
                 else
                 {
                     return false;
                 }
             }
-            if (succeeded || !task->is_retrying())
-            {
-                children.pop_front();
-            }
+            children.pop_front();
         }
         return true;
     }
@@ -64,36 +52,28 @@ namespace rhoban
         ArmController &controller,
         geometry_msgs::PoseStamped target,
         tf2_ros::Buffer &tf,
+        int num_retries,
         double duration)
     {
-        geometry_msgs::PoseStamped transformed_target;
-        geometry_msgs::TransformStamped target_to_map;
-        try
-        {
-            target_to_map = tf.lookupTransform("map", target.header.frame_id, ros::Time(0));
-        }
-        catch(const std::exception& e)
-        {
-            std::cerr << e.what() << '\n';
-        }
-        tf2::doTransform(target, transformed_target, target_to_map);
         
-        return add(std::make_shared<ReachingTask>(controller, transformed_target, duration));
+        return add(std::make_shared<ReachingTask>(controller, target, duration, num_retries));
     }
 
     CompoundTask &CompoundTask::add_placement(
         PlacementController &controller,
-        geometry_msgs::PoseStamped target)
+        geometry_msgs::PoseStamped target,
+        int num_retries)
     {
-        return add(std::make_shared<PlacementTask>(controller, target));
+        return add(std::make_shared<PlacementTask>(controller, target, num_retries));
     }
 
     CompoundTask &CompoundTask::add_gripper(
         ArmController &controller,
         GripperTask::Action action,
+        int num_retries,
         double position)
     {
-        return add(std::make_shared<GripperTask>(controller, action, position));
+        return add(std::make_shared<GripperTask>(controller, action, position, num_retries));
     }
 
 } // namespace rhoban

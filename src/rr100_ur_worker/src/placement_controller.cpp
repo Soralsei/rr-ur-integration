@@ -74,6 +74,7 @@ namespace rhoban
             move_base_msgs::MoveBaseGoal goal;
             goal.target_pose = P;
             goal.target_pose.header.stamp = ros::Time::now();
+            goal.target_pose.header.frame_id = "map";
 
             auto ret = move_base_client.sendGoalAndWait(goal, ros::Duration(0.0));
             bool succeeded = ret == actionlib::SimpleClientGoalState::SUCCEEDED;

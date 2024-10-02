@@ -22,10 +22,12 @@ source devel/setup.bash
 ```
 
 ## Utilisation
-Afin de pouvoir exécuter les noeuds ROS de ce projet sur le robot réel, il faut tout d'abord sourcer le script `setup_roscore_robot`:
+Afin de pouvoir exécuter les noeuds ROS de ce projet sur le robot réel, il faut tout d'abord s'assurer d'être sur le même réseau que le robot (ex. RHOBAN) et ensuite de sourcer le script `setup_roscore_robot` en lui passant en paramètre l'IP de l'interface réseau connecté au même réseau que le robot (avec ifconfig ou ip a) de l'ordinateur hôte (pas dans le conteneur) :
 ```
 source setup_roscore_robot <IP de l'interface connectée au robot>
 ```
+
+Assurez-vous d'avoir suivi la [première partie du guide d'utilisation du projet de navigation du RR100](https://github.com/Soralsei/rr100-rhoban/tree/main?tab=readme-ov-file#with-the-real-robot) sur la configuration de la traduction du nom du RR100 vers son adresse IP.
 
 Pour vérifier que tout est bien configuré, exécuter la commande `rostopic list` et vérifier que les topics du RR100 sont bien affichés :
 

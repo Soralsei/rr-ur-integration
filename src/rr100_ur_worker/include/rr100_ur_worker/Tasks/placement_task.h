@@ -13,7 +13,7 @@ namespace rhoban
         PlacementController &controller;
 
     public:
-        PlacementTask(PlacementController &controller_, geometry_msgs::PoseStamped target_);
+        PlacementTask(PlacementController &controller_, geometry_msgs::PoseStamped target_, int num_retries = 0);
         ~PlacementTask();
         virtual bool execute();
     };

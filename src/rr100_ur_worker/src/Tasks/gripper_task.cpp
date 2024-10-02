@@ -5,7 +5,12 @@ namespace rhoban
     GripperTask::GripperTask(
         ArmController &controller_,
         Action action_,
-        double value_) : Task::Task(priority::Normal, "GripperTask") ,controller(controller_), action(action_), value(value_) {}
+        double position_,
+        int num_retries_)
+        : Task::Task(priority::Normal, "GripperTask", num_retries_),
+          controller(controller_),
+          action(action_),
+          position(position_) {}
 
     GripperTask::~GripperTask() {}
 
@@ -16,20 +21,20 @@ namespace rhoban
         switch (action)
         {
         case Action::Grip:
-            value = ArmController::GRIPPER_CLOSED;
+            position = ArmController::GRIPPER_CLOSED;
             break;
         case Action::Release:
-            value = ArmController::GRIPPER_OPEN;
+            position = ArmController::GRIPPER_OPEN;
             break;
         case Action::Set:
-            value = std::max(ArmController::GRIPPER_OPEN, std::min(value, ArmController::GRIPPER_CLOSED));
+            position = std::max(ArmController::GRIPPER_OPEN, std::min(position, ArmController::GRIPPER_CLOSED));
             break;
         default:
             ROS_ERROR("GripperTask : Got Unknown Action %d", static_cast<int>(action));
             return false;
         }
 
-        auto res = controller.set_gripper(value);
+        auto res = controller.set_gripper(position);
         switch (res)
         {
         case ArmController::Result::STALLED:
