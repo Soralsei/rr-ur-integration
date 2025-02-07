@@ -36,6 +36,10 @@
 
     <xacro:arg name="ur_prefix" default="ur_" />
 
+    <xacro:arg name="rslidar_enabled" default="true" />
+    <xacro:arg name="realsense_enabled" default="true" />
+    <xacro:arg name="gps_enabled" default="true" />
+
     <xacro:include filename="$(find rr100_description)/urdf/rr100.urdf.xacro" />
     <xacro:include filename="$(find ur5e_gripper_description)/urdf/ur_hand_e.xacro" />
 
@@ -72,14 +76,16 @@
         <child link="mounting_base_link" />
     </joint>
 
-    <link name="aruco_marker_link" />
-    <joint name="aruco_marker_joint" type="fixed">
-        <origin
-            xyz="0 0 0.073"
-            rpy="0 0 0" />
-        <parent link="rslidar_base_link" />
-        <child link="aruco_marker_link" />
-    </joint>
+    <xacro:if value="$(arg rslidar_enabled)">
+        <link name="aruco_marker_link" />
+        <joint name="aruco_marker_joint" type="fixed">
+            <origin
+                xyz="0 0 0.073"
+                rpy="0 0 0" />
+            <parent link="rslidar_base_link" />
+            <child link="aruco_marker_link" />
+        </joint>
+    </xacro:if>
 
     <gazebo reference="mounting_base_link" />
 
