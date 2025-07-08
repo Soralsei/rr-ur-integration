@@ -1,0 +1,12 @@
+[submodule "src/ur_rr_packages"]
+	path = src/ur_rr_packages
+	url = https://github.com/Soralsei/ur_rr_packages.git
+	branch = master
+[submodule "src/rr100_packages"]
+	path = src/rr100_packages
+	url = https://github.com/Soralsei/rr100_packages.git
+	branch = master
+[submodule "src/ur5_packages"]
+	path = src/ur5_packages
+	url = https://github.com/Soralsei/ur5_rhoban_packages.git
+	branch = master
