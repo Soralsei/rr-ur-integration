@@ -11,7 +11,6 @@
 			"--progress=plain"
 			// "--no-cache-filter=cacher"
 		],
-		"target": "dev"
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
@@ -43,8 +42,6 @@
 		}
 	},
 
-	"workspaceMount": "source=${localWorkspaceFolder},target=/root/ros/integration_ws,type=bind,consistency=cached",
-	"workspaceFolder": "/root/ros/integration_ws",
 	"privileged": true,
 	"runArgs": [
 		"--net=host",
@@ -61,11 +58,6 @@
 		{
 			"source": "${localEnv:HOME}/.gazebo",
 			"target": "/root/.gazebo/",
-			"type": "bind"
-		},
-		{
-			"source": "/dev/",
-			"target": "/dev/",
 			"type": "bind"
 		}
 	]
