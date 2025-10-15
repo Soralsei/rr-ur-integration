@@ -45,8 +45,6 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 ## ADD ANY CUSTOM SETUP BELOW ##
 ################################
 
-WORKDIR /home/ubuntu
-
 # Create conda env for zmq rl_controller
 # RUN  echo $(pwd) && arch=$(uname -m) && \
 # if [ "$arch" = "x86_64" ]; then \
@@ -72,4 +70,4 @@ WORKDIR /home/ubuntu
 # && $HOME/miniconda3/bin/conda run -n rl pip install zmq \
 # && $HOME/miniconda3/bin/conda config --set auto_activate_base false
 
-RUN echo "source $HOME/rr100_ws/devel/setup.bash" >> $HOME/.bashrc
+# RUN echo "source $HOME/rr100_ws/devel/setup.bash" >> $HOME/.bashrc
