@@ -10,14 +10,15 @@ Récupérer le projet depuis le github et lancer VS Code dans le répertoire ré
 ```bash
 git clone git@github.com:Soralsei/rr-ur-integration.git
 code rr-ur-integration
+git submodule update --init --recursive
 ```
 Ensuite, lancer le `Dev Container` inclus en faisant :
 - Presser `Shift + Ctrl + P` pour ouvrir la palette de commande
 - Taper `Dev Container: Reopen In Container` dans la palette de commande
   
-Cette commande va rouvrir le projet dans un conteneur Docker capable d'exécuter le projet. Cette étape risque de prendre quelques minutes lors de la première exécution afin de construire le conteneur Docker. Quand le build du conteneur termine, il faut ensuite build le projet et sourcer le script de setup :
+Cette commande va rouvrir le projet dans un conteneur Docker capable d'exécuter le projet. Cette étape risque de prendre quelques minutes lors de la première exécution afin de construire le conteneur Docker. Quand le build du conteneur termine, il faut ensuite build le projet en utilisant le script `install_deps_and_build.sh` et sourcer le script de setup :
 ```bash
-catkin_make
+./install_deps_and_build.sh
 source devel/setup.bash
 ```
 
@@ -45,26 +46,11 @@ Ceci va charger un programme ainsi qu'une configuration de sécurité du bras. E
 
 #### Initialisation des systèmes de contrôle
 Commencer par se connecter en SSH au RR100 et rentrer le mot de passe quand demandé :
-
 ```
 ssh user@rr-100-07
 ```
 
-Ensuite, se déplacer dans le répertoire du projet (normalement déjà présent sur le robot) et sourcer le script de setup si le workspace est déjà built :
-
-```
-cd rr-ur-integration
-source devel/setup.bash
-```
-Sinon, si le projet n'est pas déjà compilé, se déplacer dans les répertoire `rr100-rhoban`, supprimer les dossiers `devel` et `build`, compiler ce workspace et enfin sourcer le fichier de configuration généré :
-```
-cd ~/rr100-rhoban
-rm -rf devel build
-catkin_make
-source devel/setup.bash
-```
-
-Ensuite, faire de même pour le répertoire `ur5-rhoban` et enfin le répertoire `rr-ur-integration`.
+Ensuite, cloner le projet sur le robot et initialiser les `git submodules` de celui-ci si ce n'est pas déjà fait. Ensuite build le projet précédemment avec le script `install_deps_and_build`
 
 Pour initialiser le robot, lancer la commande suivante :
 ```bash
