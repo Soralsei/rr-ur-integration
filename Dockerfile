@@ -29,7 +29,7 @@ RUN DEBIAN_FRONTEND=noninteractive sudo apt update \
 && sudo apt upgrade -y \
 && sudo apt install -y --no-install-recommends -y \
 wget libpcl-dev libmodbus5 libpcap0.8 git ros-${ROS_DISTRO}-tf2-tools \
-python-is-python3 libnss-mdns python3-catkin-tools \
+python-is-python3 python3-pip libnss-mdns python3-catkin-tools \
 iputils-ping \
 iproute2 \
 net-tools \

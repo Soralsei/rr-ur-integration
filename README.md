@@ -1,6 +1,12 @@
 # Tutoriel d'utilisation du projet
 ## Pré-requis
 
+Pour pouvoir se connecter en ssh au robot, il faut d'abord s'assurer de copier sa clé SSH sur celui-ci grâce à la commande suivante depuis le réseau RHOBAN :
+```bash
+ssh-copy-id user@192.168.0.115
+```
+Cela servira également lors du lancement des noeuds ROS à distance.
+
 Commencer par installer l'extension `Dev Containers`:
 - Presser `Shift + Ctrl + X` pour ouvrir le marketplace des extensions de VS Code
 - Rechercher l'extension `Dev Containers` dans la barre de recherche et l'installer (nécessite une installation de `Docker`)
@@ -115,7 +121,7 @@ roslaunch rr100_ur_navigation navigation.launch use_static_map:=false use_rviz:=
 ### Serveur de cinématique inverse
 Pour lancer le serveur de cinématique inverse du projet, lancer la commande suivante soit directement sur le RR100, soit en local :
 ```
-roslaunch ur5_kinematics ur5_kinematics.launch link_prefix:=ur_ base_frame:=base_footprint
+roslaunch ur5_kinematics ur5_kinematics.launch link_prefix:=ur_ base_frame:=base_footprint joint_states_topic:=/ur/joint_states
 ```
 
 La sortie de cette commande de lancement devrait être de cette forme :
@@ -125,7 +131,7 @@ La sortie de cette commande de lancement devrait être de cette forme :
 Pour lancer le serveur de placement de la base robot, lancer la commande suivante soit directement sur le RR100, soit en local :
 ```bash
 roslaunch rr100_ur_placement rr100_ur_placement.launch \
-    workspace_config_path:=$(rospack find rr100_ur_description)/config/reachable_points.json \
+    workspace_config_path:=$(rospack find rr100_ur_description)/config/reachable_points_transformed.json \
     footprint_topic:=/move_base_rr100/global_costmap/footprint \
     map_topic:=/map
 ```
