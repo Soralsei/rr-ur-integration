@@ -29,7 +29,8 @@ done
 
 echo "Checking if rr100_* ros packages are installed..."
 rospack find rr100_control 1> /dev/null 2> /dev/null
-if [[ $? -ne 0 ]] || [[ $force_resintall -eq true ]] ; then
+found=$?
+if [[ $found -ne 0 ]] || [[ $force_resintall = true ]] ; then
     echo "Could not find rr100_control package, installing debfiles..."
     cd "$debians_path"
     sudo python deploy_debians_noetic.py .
