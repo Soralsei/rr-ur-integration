@@ -10,7 +10,7 @@
 		"options": [
 			"--progress=plain"
 			// "--no-cache-filter=cacher"
-		],
+		]
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
@@ -21,6 +21,8 @@
 
 	// Uncomment the next line to run commands after the container is created.
 	// "postCreateCommand": "cat /etc/os-release",
+	"initializeCommand": "export DEVICE_IP=$(ping -c1 rr-100-07.local | grep PING | awk '{print $3}' | tr -d '()') || export DEVICE_IP=192.168.0.115",
+    "postStartCommand": "/usr/local/bin/post_start.sh",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
